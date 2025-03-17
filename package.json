@@ -1,0 +1,461 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "baby-buddy",
+  "title": "Baby Buddy",
+  "description": "Interact with baby buddy",
+  "icon": "icon.png",
+  "author": "ShaneTheKing",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Show Baby Info",
+      "description": "View information about your children",
+      "mode": "view"
+    },
+    {
+      "name": "timers",
+      "title": "Active Timers",
+      "description": "View and manage active timers",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Baby Buddy URL",
+      "description": "The URL of your Baby Buddy instance (e.g., https://baby.example.com)",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Baby Buddy API key",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.60.0",
+    "@raycast/utils": "^1.17.0",
+    "axios": "^1.6.7",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "tools": [
+    {
+      "title": "Get Children",
+      "name": "getChildren",
+      "description": "Get a list of all children registered in Baby Buddy",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "title": "Get Active Timers",
+      "name": "getActiveTimers",
+      "description": "Get a list of all active timers",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    {
+      "title": "Get Feedings",
+      "name": "getChildFeedings",
+      "description": "Get feeding information for a specific child",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "childName": {
+            "type": "string",
+            "description": "The first name of the child"
+          },
+          "timeframe": {
+            "type": "string",
+            "enum": ["today", "recent", "last"],
+            "description": "The timeframe for which to get feeding information"
+          }
+        },
+        "required": ["childName"]
+      }
+    },
+    {
+      "title": "Get Sleep",
+      "name": "getChildSleep",
+      "description": "Get sleep information for a specific child",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "childName": {
+            "type": "string",
+            "description": "The first name of the child"
+          },
+          "timeframe": {
+            "type": "string",
+            "enum": ["today", "recent", "last"],
+            "description": "The timeframe for which to get sleep information"
+          }
+        },
+        "required": ["childName"]
+      }
+    },
+    {
+      "title": "Get Diapers",
+      "name": "getChildDiapers",
+      "description": "Get diaper change information for a specific child",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "childName": {
+            "type": "string",
+            "description": "The first name of the child"
+          },
+          "timeframe": {
+            "type": "string",
+            "enum": ["today", "recent", "last"],
+            "description": "The timeframe for which to get diaper information"
+          }
+        },
+        "required": ["childName"]
+      }
+    },
+    {
+      "title": "Get Tummy Time",
+      "name": "getChildTummyTime",
+      "description": "Get tummy time information for a specific child",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "childName": {
+            "type": "string",
+            "description": "The first name of the child"
+          },
+          "timeframe": {
+            "type": "string",
+            "enum": ["today", "recent", "last"],
+            "description": "The timeframe for which to get tummy time information"
+          }
+        },
+        "required": ["childName"]
+      }
+    },
+    {
+      "title": "Create Diaper Change",
+      "name": "createDiaperChange",
+      "description": "Create a new diaper change entry for a child",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "childName": {
+            "type": "string",
+            "description": "The first name of the child"
+          },
+          "wet": {
+            "type": "boolean",
+            "description": "Whether the diaper was wet"
+          },
+          "solid": {
+            "type": "boolean",
+            "description": "Whether the diaper contained solid waste"
+          },
+          "color": {
+            "type": "string",
+            "enum": ["black", "brown", "green", "yellow", "white", ""],
+            "description": "The color of solid waste, if applicable"
+          },
+          "amount": {
+            "type": "string",
+            "description": "The amount, if applicable"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Any notes about the diaper change"
+          },
+          "time": {
+            "type": "string",
+            "description": "The time of the diaper change (ISO string). If not provided, current time will be used."
+          }
+        },
+        "required": ["childName"]
+      }
+    },
+    {
+      "title": "Create Feeding",
+      "name": "createFeeding",
+      "description": "Create a new feeding entry for a child",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "childName": {
+            "type": "string",
+            "description": "The first name of the child"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["breast milk", "formula", "solid food", "fortified breast milk"],
+            "description": "The type of feeding"
+          },
+          "method": {
+            "type": "string",
+            "enum": ["bottle", "left breast", "right breast", "both breasts", "parent fed", "self fed"],
+            "description": "The feeding method"
+          },
+          "amount": {
+            "type": "string",
+            "description": "The amount fed, if applicable"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Any notes about the feeding"
+          },
+          "startTime": {
+            "type": "string",
+            "description": "The start time of the feeding (ISO string). If not provided, 5 minutes ago will be used."
+          },
+          "endTime": {
+            "type": "string",
+            "description": "The end time of the feeding (ISO string). If not provided, current time will be used."
+          }
+        },
+        "required": ["childName", "type"]
+      }
+    },
+    {
+      "title": "Edit Feeding",
+      "name": "editFeeding",
+      "description": "Update an existing feeding entry for a child",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "feedingId": {
+            "type": "number",
+            "description": "The ID of the feeding entry to edit"
+          },
+          "childName": {
+            "type": "string",
+            "description": "The name of the child (if changing the child)"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["breast milk", "formula", "solid food", "fortified breast milk"],
+            "description": "The type of feeding"
+          },
+          "method": {
+            "type": "string",
+            "enum": ["bottle", "left breast", "right breast", "both breasts", "parent fed", "self fed"],
+            "description": "The feeding method"
+          },
+          "amount": {
+            "type": "string",
+            "description": "The amount fed, if applicable"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Any notes about the feeding"
+          },
+          "startTime": {
+            "type": "string",
+            "description": "The start time of the feeding (ISO string or HH:MM:SS format)"
+          },
+          "endTime": {
+            "type": "string",
+            "description": "The end time of the feeding (ISO string or HH:MM:SS format)"
+          }
+        },
+        "required": ["feedingId"]
+      }
+    },
+    {
+      "title": "Get Feedings List",
+      "name": "getFeedings",
+      "description": "Get a list of feedings for a specific child",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "childName": {
+            "type": "string",
+            "description": "The name of the child"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Number of feedings to retrieve (default: 10)"
+          },
+          "todayOnly": {
+            "type": "boolean",
+            "description": "Whether to return only today's feedings (default: false)"
+          }
+        },
+        "required": ["childName"]
+      }
+    },
+    {
+      "title": "Delete Feeding",
+      "name": "deleteFeeding",
+      "description": "Delete a feeding entry",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "feedingId": {
+            "type": "number",
+            "description": "The ID of the feeding entry to delete"
+          }
+        },
+        "required": ["feedingId"]
+      }
+    },
+    {
+      "title": "Create Sleep",
+      "name": "createSleep",
+      "description": "Create a new sleep entry for a child",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "childName": {
+            "type": "string",
+            "description": "The first name of the child"
+          },
+          "isNap": {
+            "type": "boolean",
+            "description": "Whether this is a nap (true) or night sleep (false)"
+          },
+          "notes": {
+            "type": "string",
+            "description": "Any notes about the sleep"
+          },
+          "startTime": {
+            "type": "string",
+            "description": "The start time of the sleep (ISO string). If not provided, 1 hour ago will be used."
+          },
+          "endTime": {
+            "type": "string",
+            "description": "The end time of the sleep (ISO string). If not provided, current time will be used."
+          }
+        },
+        "required": ["childName"]
+      }
+    },
+    {
+      "title": "Create Tummy Time",
+      "name": "createTummyTime",
+      "description": "Create a new tummy time entry for a child",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "childName": {
+            "type": "string",
+            "description": "The first name of the child"
+          },
+          "milestone": {
+            "type": "string",
+            "description": "Any milestone achieved during tummy time"
+          },
+          "startTime": {
+            "type": "string",
+            "description": "The start time of the tummy time (ISO string). If not provided, 15 minutes ago will be used."
+          },
+          "endTime": {
+            "type": "string",
+            "description": "The end time of the tummy time (ISO string). If not provided, current time will be used."
+          }
+        },
+        "required": ["childName"]
+      }
+    },
+    {
+      "title": "Create Timer",
+      "name": "createTimer",
+      "description": "Create a new timer for a child",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "childName": {
+            "type": "string",
+            "description": "The first name of the child"
+          },
+          "timerName": {
+            "type": "string",
+            "description": "The name of the timer (e.g., 'Feeding', 'Sleep', 'Tummy Time')"
+          },
+          "startTime": {
+            "type": "string",
+            "description": "The start time of the timer (ISO string). If not provided, current time will be used."
+          }
+        },
+        "required": ["childName", "timerName"]
+      }
+    },
+    {
+      "title": "Stop Timer",
+      "name": "stopTimer",
+      "description": "Stop an active timer",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "childName": {
+            "type": "string",
+            "description": "The first name of the child"
+          },
+          "timerName": {
+            "type": "string",
+            "description": "The name of the timer to stop"
+          }
+        },
+        "required": ["childName"]
+      }
+    },
+    {
+      "title": "Get Sleeping Children",
+      "name": "getSleepingChildren",
+      "description": "Get a list of children who are currently sleeping",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    }
+  ],
+  "ai": {
+    "instructions": "If the user does not specify a child name and they have more than one child, ask them to specify a child name. If they only have one child, use that child's name without asking. All time-based inputs should be DateTimes unless otherwise specified, if the user only provides a time assume it's today unless otherwise specified. For time based outputs, format the output to the user's regional date time format.",
+    "evals": [
+      {
+        "input": "When is the last time my children ate?",
+        "usedAsExample": true
+      },
+      {
+        "input": "When is the last time my children had a diaper change?",
+        "usedAsExample": true
+      },
+      {
+        "input": "Have my children eaten since their last nap?",
+        "usedAsExample": true
+      },
+      {
+        "input": "Convert the active timer to a feeding entry for formula",
+        "usedAsExample": true
+      }
+    ]
+  }
+}
