@@ -49,21 +49,21 @@ export default async function editDiaper({
   time,
 }: EditDiaperInput) {
   const api = new BabyBuddyAPI();
-  
+
   let childId: number | undefined;
-  
+
   // If childName is provided, look up the child ID
   if (childName) {
     const children = await api.getChildren();
     const child = findChildByName(children, childName);
-    
+
     if (!child) {
       throw new Error(`Child with name ${childName} not found`);
     }
-    
+
     childId = child.id;
   }
-  
+
   // Prepare update data using utility function
   const updateData = prepareDiaperUpdateData({
     childId,
@@ -72,23 +72,23 @@ export default async function editDiaper({
     solid,
     color,
     amount,
-    notes
+    notes,
   });
-  
+
   // Only proceed if there's something to update
   if (Object.keys(updateData).length === 0) {
     return { message: "No updates provided" };
   }
-  
+
   try {
     const updatedDiaper = await api.updateDiaper(diaperId, updateData);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Diaper Change Updated",
       message: `Updated diaper change #${diaperId}`,
     });
-    
+
     return updatedDiaper;
   } catch (error) {
     await showToast({
@@ -96,7 +96,7 @@ export default async function editDiaper({
       title: "Error",
       message: formatErrorMessage(error),
     });
-    
+
     throw error;
   }
-} 
+}

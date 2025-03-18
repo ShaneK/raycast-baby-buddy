@@ -15,37 +15,35 @@ type DeleteTummyTimeInput = {
 export const confirmation: Tool.Confirmation<DeleteTummyTimeInput> = async () => {
   return {
     style: Action.Style.Destructive,
-    message: "Are you sure you want to delete this tummy time entry?"
+    message: "Are you sure you want to delete this tummy time entry?",
   };
 };
 
-export default async function deleteTummyTime({
-  tummyTimeId,
-}: DeleteTummyTimeInput) {
+export default async function deleteTummyTime({ tummyTimeId }: DeleteTummyTimeInput) {
   const api = new BabyBuddyAPI();
-  
+
   try {
     await api.deleteTummyTime(tummyTimeId);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Tummy Time Deleted",
       message: `Deleted tummy time #${tummyTimeId}`,
     });
-    
+
     return { success: true, tummyTimeId };
   } catch (error) {
     let errorMessage = "Failed to delete tummy time";
     if (axios.isAxiosError(error) && error.response) {
       errorMessage += `: ${JSON.stringify(error.response.data)}`;
     }
-    
+
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
       message: errorMessage,
     });
-    
+
     throw error;
   }
-} 
+}

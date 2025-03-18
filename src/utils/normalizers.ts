@@ -36,8 +36,8 @@ export function normalizeMethod(method: string): string {
   // Valid methods in Baby Buddy: bottle, left breast, right breast, both breasts
   if (method.includes("bottle")) {
     return "bottle";
-	} else if (method.includes("self")) {
-		return "self fed";
+  } else if (method.includes("self")) {
+    return "self fed";
   } else if (method.includes("left")) {
     return "left breast";
   } else if (method.includes("right")) {
@@ -59,23 +59,23 @@ export function normalizeMethod(method: string): string {
  */
 export function formatTimeToISO(timeString?: string): string | undefined {
   if (!timeString) return undefined;
-  
-  if (timeString.includes('T') && timeString.includes('-')) {
+
+  if (timeString.includes("T") && timeString.includes("-")) {
     // Already in ISO format
     return timeString;
-  } else if (timeString.includes(':')) {
+  } else if (timeString.includes(":")) {
     // HH:MM:SS or HH:MM format
     const today = new Date();
-    const [hours, minutes, seconds = '00'] = timeString.split(':').map(part => part.trim());
-    
+    const [hours, minutes, seconds = "00"] = timeString.split(":").map((part) => part.trim());
+
     today.setHours(parseInt(hours, 10));
     today.setMinutes(parseInt(minutes, 10));
     today.setSeconds(parseInt(seconds, 10));
     today.setMilliseconds(0);
-    
+
     return today.toISOString();
   }
-  
+
   return undefined;
 }
 
@@ -84,15 +84,15 @@ export function formatTimeToISO(timeString?: string): string | undefined {
  */
 export function calculateDuration(startTime?: string, endTime?: string): string | undefined {
   if (!startTime || !endTime) return undefined;
-  
+
   const startDate = new Date(startTime);
   const endDate = new Date(endTime);
   const durationMs = endDate.getTime() - startDate.getTime();
-  
+
   const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
   const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
   const durationSeconds = Math.floor((durationMs % (1000 * 60)) / 1000);
-  
+
   return `${durationHours.toString().padStart(2, "0")}:${durationMinutes.toString().padStart(2, "0")}:${durationSeconds.toString().padStart(2, "0")}`;
 }
 
@@ -118,7 +118,7 @@ export function findChildByName(children: Child[], childName: string): Child | u
  */
 export function normalizeContents(contents: string): { wet: boolean; solid: boolean } {
   contents = contents.toLowerCase();
-  
+
   if (contents.includes("both")) {
     return { wet: true, solid: true };
   } else if (contents.includes("wet")) {
@@ -126,7 +126,7 @@ export function normalizeContents(contents: string): { wet: boolean; solid: bool
   } else if (contents.includes("solid") || contents.includes("poop") || contents.includes("bm")) {
     return { wet: false, solid: true };
   }
-  
+
   // Default to wet if no match
   return { wet: true, solid: false };
 }
@@ -145,4 +145,4 @@ export function getContentsDescription(contents: { wet: boolean; solid: boolean 
     return "solid";
   }
   return "unknown";
-} 
+}

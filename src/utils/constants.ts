@@ -48,4 +48,4 @@ export const TIMER_TYPES = [
   { id: "sleep", name: "Sleep" },
   { id: "tummy-time", name: "Tummy Time" },
   { id: "other", name: "Other" },
-]; 
+];

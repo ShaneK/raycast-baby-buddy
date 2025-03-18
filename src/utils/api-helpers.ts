@@ -11,22 +11,18 @@ import { calculateDuration, formatTimeToISO } from "./date-helpers";
  */
 export function findChildByName(children: Child[], childName: string): Child | undefined {
   // First try exact match
-  let child = children.find(
-    (c) => `${c.first_name} ${c.last_name}`.toLowerCase() === childName.toLowerCase()
-  );
-  
+  let child = children.find((c) => `${c.first_name} ${c.last_name}`.toLowerCase() === childName.toLowerCase());
+
   // If no exact match, try by first name only
   if (!child) {
     child = children.find((c) => c.first_name.toLowerCase() === childName.toLowerCase());
   }
-  
+
   // If still no match, try contains
   if (!child) {
-    child = children.find((c) => 
-      `${c.first_name} ${c.last_name}`.toLowerCase().includes(childName.toLowerCase())
-    );
+    child = children.find((c) => `${c.first_name} ${c.last_name}`.toLowerCase().includes(childName.toLowerCase()));
   }
-  
+
   return child;
 }
 
@@ -86,7 +82,7 @@ export function normalizeContents(contents: string): { wet: boolean; solid: bool
   contents = contents.toLowerCase();
   const wet = contents.includes("wet") || contents.includes("urine") || contents.includes("pee");
   const solid = contents.includes("solid") || contents.includes("poop") || contents.includes("bm");
-  
+
   return { wet, solid };
 }
 
@@ -118,24 +114,24 @@ export function prepareDiaperUpdateData(params: {
   notes?: string;
 }): Partial<DiaperEntry> {
   const { childId, time, wet, solid, color, amount, notes } = params;
-  
+
   const updateData: Partial<DiaperEntry> = {};
-  
+
   if (childId !== undefined) updateData.child = childId;
   if (time !== undefined) updateData.time = formatTimeToISO(time) || time;
   if (wet !== undefined) updateData.wet = wet;
   if (solid !== undefined) updateData.solid = solid;
-  
+
   // Only include color if solid is true
   if (solid && color !== undefined) updateData.color = color;
-  
+
   // Convert amount to number if it's a string
   if (amount !== undefined) {
-    updateData.amount = typeof amount === 'string' ? parseFloat(amount) || null : amount;
+    updateData.amount = typeof amount === "string" ? parseFloat(amount) || null : amount;
   }
-  
+
   if (notes !== undefined) updateData.notes = notes;
-  
+
   return updateData;
 }
 
@@ -152,31 +148,31 @@ export function prepareFeedingUpdateData(params: {
   notes?: string;
 }): Partial<FeedingEntry> {
   const { childId, startTime, endTime, type, method, amount, notes } = params;
-  
+
   const updateData: Partial<FeedingEntry> = {};
-  
+
   if (childId !== undefined) updateData.child = childId;
   if (startTime !== undefined) updateData.start = formatTimeToISO(startTime) || startTime;
   if (endTime !== undefined) updateData.end = formatTimeToISO(endTime) || endTime;
-  
+
   // Calculate duration if both start and end times are provided
   if (startTime && endTime) {
     updateData.duration = calculateDuration(
       formatTimeToISO(startTime) || startTime,
-      formatTimeToISO(endTime) || endTime
+      formatTimeToISO(endTime) || endTime,
     );
   }
-  
+
   if (type !== undefined) updateData.type = normalizeType(type);
   if (method !== undefined) updateData.method = normalizeMethod(method);
-  
+
   // Convert amount to number if it's a string
   if (amount !== undefined) {
-    updateData.amount = typeof amount === 'string' ? parseFloat(amount) || null : amount;
+    updateData.amount = typeof amount === "string" ? parseFloat(amount) || null : amount;
   }
-  
+
   if (notes !== undefined) updateData.notes = notes;
-  
+
   return updateData;
 }
 
@@ -191,43 +187,43 @@ export function prepareSleepUpdateData(params: {
   notes?: string;
 }): Partial<SleepEntry> {
   const { childId, startTime, endTime, isNap, notes } = params;
-  
+
   const updateData: Partial<SleepEntry> = {};
-  
+
   if (childId !== undefined) updateData.child = childId;
   if (startTime !== undefined) updateData.start = formatTimeToISO(startTime) || startTime;
   if (endTime !== undefined) updateData.end = formatTimeToISO(endTime) || endTime;
-  
+
   // Calculate duration if both start and end times are provided
   if (startTime && endTime) {
     updateData.duration = calculateDuration(
       formatTimeToISO(startTime) || startTime,
-      formatTimeToISO(endTime) || endTime
+      formatTimeToISO(endTime) || endTime,
     );
   }
-  
+
   if (isNap !== undefined) updateData.nap = isNap;
   if (notes !== undefined) updateData.notes = notes;
-  
+
   return updateData;
 }
 
 /**
  * Prepare timer update data for API request
  */
-export function prepareTimerUpdateData(params: {
-  timerName?: string;
-  startTime?: string;
-  endTime?: string;
-}): { name?: string; start?: string; end?: string } {
+export function prepareTimerUpdateData(params: { timerName?: string; startTime?: string; endTime?: string }): {
+  name?: string;
+  start?: string;
+  end?: string;
+} {
   const { timerName, startTime, endTime } = params;
-  
+
   const updateData: { name?: string; start?: string; end?: string } = {};
-  
+
   if (timerName !== undefined) updateData.name = timerName;
   if (startTime !== undefined) updateData.start = formatTimeToISO(startTime) || startTime;
   if (endTime !== undefined) updateData.end = formatTimeToISO(endTime) || endTime;
-  
+
   return updateData;
 }
 
@@ -238,13 +234,13 @@ export function getTimerName(timerType: string, customName: string): string {
   if (customName && customName.trim()) {
     return customName.trim();
   }
-  
+
   // Find the timer type in the constants
   const timerTypeObj = TIMER_TYPES.find((t) => t.id === timerType);
-  
+
   if (timerTypeObj) {
     return timerTypeObj.name;
   }
-  
-  return 'Timer';
-} 
+
+  return "Timer";
+}

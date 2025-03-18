@@ -7,4 +7,4 @@
  */
 export function isValidDiaperType(wet: boolean, solid: boolean): boolean {
   return wet || solid;
-} 
+}

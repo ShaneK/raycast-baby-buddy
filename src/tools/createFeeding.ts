@@ -33,14 +33,14 @@ export default async function ({
 }) {
   const api = new BabyBuddyAPI();
   const children = await api.getChildren();
-  
+
   // Find child using the utility function
   const child = findChildByName(children, childName);
-  
+
   if (!child) {
     throw new Error(`Child with name ${childName} not found`);
   }
-  
+
   // Create complete feeding data using utility function
   const feedingData = createFeedingData({
     childId: child.id,
@@ -51,16 +51,16 @@ export default async function ({
     amount,
     notes,
   });
-  
+
   try {
     const newFeeding = await api.createFeeding(feedingData);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Feeding Created",
       message: `Recorded ${feedingData.type} feeding for ${child.first_name}`,
     });
-    
+
     return newFeeding;
   } catch (error) {
     await showToast({
@@ -68,7 +68,7 @@ export default async function ({
       title: "Error",
       message: formatErrorMessage(error),
     });
-    
+
     throw error;
   }
 }

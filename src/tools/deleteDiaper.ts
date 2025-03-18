@@ -19,33 +19,31 @@ export const confirmation: Tool.Confirmation<DeleteDiaperInput> = async () => {
   };
 };
 
-export default async function deleteDiaper({
-  diaperId,
-}: DeleteDiaperInput) {
+export default async function deleteDiaper({ diaperId }: DeleteDiaperInput) {
   const api = new BabyBuddyAPI();
-  
+
   try {
     await api.deleteDiaper(diaperId);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Diaper Change Deleted",
       message: `Deleted diaper change #${diaperId}`,
     });
-    
+
     return { success: true, diaperId };
   } catch (error) {
     let errorMessage = "Failed to delete diaper change";
     if (axios.isAxiosError(error) && error.response) {
       errorMessage += `: ${JSON.stringify(error.response.data)}`;
     }
-    
+
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
       message: errorMessage,
     });
-    
+
     throw error;
   }
 }

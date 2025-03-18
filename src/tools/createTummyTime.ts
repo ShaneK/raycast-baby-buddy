@@ -26,25 +26,25 @@ export default async function ({
 }) {
   const api = new BabyBuddyAPI();
   const children = await api.getChildren();
-  
+
   // Find child using the utility function
   const child = findChildByName(children, childName);
-  
+
   if (!child) {
     throw new Error(`Child with name ${childName} not found`);
   }
-  
+
   // Set default times if not provided
   const now = new Date();
   const defaultStartTime = new Date(now.getTime() - 5 * 60 * 1000); // 5 minutes ago
-  
+
   // Format times to ISO using utility function
   const formattedStartTime = formatTimeToISO(startTime) || defaultStartTime.toISOString();
   const formattedEndTime = formatTimeToISO(endTime) || now.toISOString();
-  
+
   // Calculate duration using utility function
   const duration = calculateDuration(formattedStartTime, formattedEndTime);
-  
+
   // Create the tummy time entry
   const tummyTimeData = {
     child: child.id,
@@ -54,16 +54,16 @@ export default async function ({
     milestone,
     notes,
   };
-  
+
   try {
     const newTummyTime = await api.createTummyTime(tummyTimeData);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Tummy Time Created",
       message: `Recorded tummy time for ${child.first_name}`,
     });
-    
+
     return newTummyTime;
   } catch (error) {
     await showToast({
@@ -71,7 +71,7 @@ export default async function ({
       title: "Error",
       message: formatErrorMessage(error),
     });
-    
+
     throw error;
   }
 }

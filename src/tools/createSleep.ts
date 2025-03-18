@@ -26,14 +26,14 @@ export default async function ({
 }) {
   const api = new BabyBuddyAPI();
   const children = await api.getChildren();
-  
+
   // Find child using the utility function
   const child = findChildByName(children, childName);
-  
+
   if (!child) {
     throw new Error(`Child with name ${childName} not found`);
   }
-  
+
   // Create complete sleep data using utility function
   const sleepData = createSleepData({
     childId: child.id,
@@ -42,16 +42,16 @@ export default async function ({
     isNap,
     notes,
   });
-  
+
   try {
     const newSleep = await api.createSleep(sleepData);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Sleep Created",
-      message: `Recorded ${isNap ? 'nap' : 'sleep'} session for ${child.first_name}`,
+      message: `Recorded ${isNap ? "nap" : "sleep"} session for ${child.first_name}`,
     });
-    
+
     return newSleep;
   } catch (error) {
     await showToast({
@@ -59,7 +59,7 @@ export default async function ({
       title: "Error",
       message: formatErrorMessage(error),
     });
-    
+
     throw error;
   }
 }

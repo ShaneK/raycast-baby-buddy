@@ -23,28 +23,28 @@ export default async function getFeedings({
 }: GetFeedingsInput): Promise<(FeedingEntry & { childName: string })[]> {
   const api = new BabyBuddyAPI();
   const children = await api.getChildren();
-  
+
   // Find child using the utility function
   const child = findChildByName(children, childName);
-  
+
   if (!child) {
     throw new Error(`Child with name ${childName} not found`);
   }
-  
+
   let feedings: FeedingEntry[];
-  
+
   if (todayOnly) {
     feedings = await api.getTodayFeedings(child.id);
   } else {
     // Get recent feedings
     feedings = await api.getRecentFeedings(child.id, limit);
   }
-  
+
   // Add child name to each feeding
-  const enhancedFeedings = feedings.map(feeding => ({
+  const enhancedFeedings = feedings.map((feeding) => ({
     ...feeding,
-    childName: `${child.first_name} ${child.last_name}`
+    childName: `${child.first_name} ${child.last_name}`,
   }));
-  
+
   return enhancedFeedings;
-} 
+}

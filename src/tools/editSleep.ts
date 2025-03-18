@@ -30,53 +30,46 @@ type EditSleepInput = {
   endTime?: string;
 };
 
-export default async function editSleep({
-  sleepId,
-  childName,
-  isNap,
-  notes,
-  startTime,
-  endTime,
-}: EditSleepInput) {
+export default async function editSleep({ sleepId, childName, isNap, notes, startTime, endTime }: EditSleepInput) {
   const api = new BabyBuddyAPI();
-  
+
   let childId: number | undefined;
-  
+
   // If childName is provided, look up the child ID
   if (childName) {
     const children = await api.getChildren();
     const child = findChildByName(children, childName);
-    
+
     if (!child) {
       throw new Error(`Child with name ${childName} not found`);
     }
-    
+
     childId = child.id;
   }
-  
+
   // Prepare update data using utility function
   const updateData = prepareSleepUpdateData({
     childId,
     startTime,
     endTime,
     isNap,
-    notes
+    notes,
   });
-  
+
   // Only proceed if there's something to update
   if (Object.keys(updateData).length === 0) {
     return { message: "No updates provided" };
   }
-  
+
   try {
     const updatedSleep = await api.updateSleep(sleepId, updateData);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Sleep Updated",
       message: `Updated sleep #${sleepId}`,
     });
-    
+
     return updatedSleep;
   } catch (error) {
     await showToast({
@@ -84,7 +77,7 @@ export default async function editSleep({
       title: "Error",
       message: formatErrorMessage(error),
     });
-    
+
     throw error;
   }
-} 
+}

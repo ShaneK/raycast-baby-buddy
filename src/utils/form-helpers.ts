@@ -1,32 +1,45 @@
 /**
- * DEPRECATED: This file exists for backwards compatibility 
+ * DEPRECATED: This file exists for backwards compatibility
  * These functions have been moved to specialized utilities
  * Import directly from utils/index.ts (or specific utility files) for new code
  */
 
 // Import the needed functions from their new homes
 import {
-    findChildByName,
-    getContentsDescription,
-    getTimerName,
-    normalizeContents,
-    normalizeMethod,
-    normalizeType,
-    prepareDiaperUpdateData,
-    prepareFeedingUpdateData,
-    prepareSleepUpdateData,
-    prepareTimerUpdateData
-} from './api-helpers';
-import { calculateDuration, formatTimeToISO, validateTimeRange } from './date-helpers';
-import { formatErrorMessage } from './formatters';
-import { isValidDiaperType, showInvalidTimeRangeError, validateDiaperForm } from './validators';
+  findChildByName,
+  getContentsDescription,
+  getTimerName,
+  normalizeContents,
+  normalizeMethod,
+  normalizeType,
+  prepareDiaperUpdateData,
+  prepareFeedingUpdateData,
+  prepareSleepUpdateData,
+  prepareTimerUpdateData,
+} from "./api-helpers";
+import { calculateDuration, formatTimeToISO, validateTimeRange } from "./date-helpers";
+import { formatErrorMessage } from "./formatters";
+import { isValidDiaperType, showInvalidTimeRangeError, validateDiaperForm } from "./validators";
 
 // Re-export them all
 export {
-    calculateDuration, findChildByName, formatErrorMessage, formatTimeToISO, getContentsDescription, getTimerName, isValidDiaperType, normalizeContents, normalizeMethod, normalizeType, prepareDiaperUpdateData,
-    prepareFeedingUpdateData,
-    prepareSleepUpdateData,
-    prepareTimerUpdateData, showInvalidTimeRangeError, validateDiaperForm, validateTimeRange
+  calculateDuration,
+  findChildByName,
+  formatErrorMessage,
+  formatTimeToISO,
+  getContentsDescription,
+  getTimerName,
+  isValidDiaperType,
+  normalizeContents,
+  normalizeMethod,
+  normalizeType,
+  prepareDiaperUpdateData,
+  prepareFeedingUpdateData,
+  prepareSleepUpdateData,
+  prepareTimerUpdateData,
+  showInvalidTimeRangeError,
+  validateDiaperForm,
+  validateTimeRange,
 };
 
 // Handle the remaining functions that haven't been moved yet
@@ -81,7 +94,7 @@ export function formatDiaperData(params: {
     solid: params.isSolid,
     color: params.color,
     amount: params.amount,
-    notes: params.notes
+    notes: params.notes,
   });
 }
 
@@ -97,7 +110,7 @@ export function formatDiaperDataFromContents(params: {
   notes: string;
 }) {
   const { wet, solid } = normalizeContents(params.contents);
-  
+
   return formatDiaperData({
     childId: params.childId,
     time: params.time,
@@ -105,22 +118,18 @@ export function formatDiaperDataFromContents(params: {
     isSolid: solid,
     color: params.color,
     amount: params.amount,
-    notes: params.notes
+    notes: params.notes,
   });
 }
 
 /**
  * Create timer data for API submission
  */
-export function createTimerData(params: {
-  childId: number;
-  name: string;
-  startTime?: Date;
-}) {
+export function createTimerData(params: { childId: number; name: string; startTime?: Date }) {
   return {
     child: params.childId,
     name: params.name,
     start: params.startTime ? params.startTime.toISOString() : new Date().toISOString(),
-    active: true
+    active: true,
   };
-} 
+}

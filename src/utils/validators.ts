@@ -37,4 +37,4 @@ export function showInvalidTimeRangeError(): void {
     title: "Invalid time range",
     message: "End time must be after start time",
   });
-} 
+}

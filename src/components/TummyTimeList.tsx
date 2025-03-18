@@ -174,12 +174,7 @@ function TummyTimeListItem({
       actions={
         <ActionPanel>
           <Action title="Edit Tummy Time" icon={Icon.Pencil} onAction={handleEdit} />
-          <Action
-            title="Delete Tummy Time"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            onAction={onDelete}
-          />
+          <Action title="Delete Tummy Time" icon={Icon.Trash} style={Action.Style.Destructive} onAction={onDelete} />
           <Action title="Create Tummy Time" icon={Icon.Plus} onAction={onCreateTummyTime} />
         </ActionPanel>
       }

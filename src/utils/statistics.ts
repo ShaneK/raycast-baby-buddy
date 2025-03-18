@@ -39,14 +39,14 @@ export function calculateTotalTummyTimeMinutes(tummyTime: TummyTimeEntry[]): num
  * Count wet diapers
  */
 export function countWetDiapers(diapers: DiaperEntry[]): number {
-  return diapers.filter(diaper => diaper.wet).length;
+  return diapers.filter((diaper) => diaper.wet).length;
 }
 
 /**
  * Count solid diapers
  */
 export function countSolidDiapers(diapers: DiaperEntry[]): number {
-  return diapers.filter(diaper => diaper.solid).length;
+  return diapers.filter((diaper) => diaper.solid).length;
 }
 
 /**
@@ -64,31 +64,31 @@ export function calculateTotalDiaperAmount(diapers: DiaperEntry[]): number {
 export function calculateAge(birthDate: string): string {
   const birth = new Date(birthDate);
   const now = new Date();
-  
+
   // Calculate difference in milliseconds
   const diffMs = now.getTime() - birth.getTime();
-  
+
   // Convert to days
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  
+
   if (days < 30) {
     return `${days} days`;
   }
-  
+
   // Convert to months
   const months = Math.floor(days / 30.44);
-  
+
   if (months < 24) {
     return `${months} months`;
   }
-  
+
   // Convert to years
   const years = Math.floor(months / 12);
   const remainingMonths = months % 12;
-  
+
   if (remainingMonths === 0) {
     return `${years} years`;
   }
-  
+
   return `${years} years, ${remainingMonths} months`;
-} 
+}

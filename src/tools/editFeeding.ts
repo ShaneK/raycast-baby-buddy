@@ -49,21 +49,21 @@ export default async function editFeeding({
   endTime,
 }: EditFeedingInput) {
   const api = new BabyBuddyAPI();
-  
+
   let childId: number | undefined;
-  
+
   // If childName is provided, look up the child ID
   if (childName) {
     const children = await api.getChildren();
     const child = findChildByName(children, childName);
-    
+
     if (!child) {
       throw new Error(`Child with name ${childName} not found`);
     }
-    
+
     childId = child.id;
   }
-  
+
   // Prepare update data using utility function
   const updateData = prepareFeedingUpdateData({
     childId,
@@ -72,23 +72,23 @@ export default async function editFeeding({
     type,
     method,
     amount,
-    notes
+    notes,
   });
-  
+
   // Only proceed if there's something to update
   if (Object.keys(updateData).length === 0) {
     return { message: "No updates provided" };
   }
-  
+
   try {
     const updatedFeeding = await api.updateFeeding(feedingId, updateData);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Feeding Updated",
       message: `Updated feeding #${feedingId}`,
     });
-    
+
     return updatedFeeding;
   } catch (error) {
     await showToast({
@@ -96,7 +96,7 @@ export default async function editFeeding({
       title: "Error",
       message: formatErrorMessage(error),
     });
-    
+
     throw error;
   }
-} 
+}

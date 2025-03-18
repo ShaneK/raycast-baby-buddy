@@ -12,22 +12,22 @@ export function formatTimeToISO(timeString?: string): string | undefined {
   if (!timeString) return undefined;
 
   // If it already looks like an ISO string, return it
-  if (timeString.includes('T') && timeString.includes('-') && timeString.includes(':')) {
+  if (timeString.includes("T") && timeString.includes("-") && timeString.includes(":")) {
     return timeString;
   }
 
   // If it's an HH:MM:SS format, convert to today's date with that time
-  if (timeString.includes(':') && timeString.split(':').length >= 2) {
+  if (timeString.includes(":") && timeString.split(":").length >= 2) {
     const now = new Date();
-    const parts = timeString.split(':');
+    const parts = timeString.split(":");
     const hours = parseInt(parts[0], 10);
     const minutes = parseInt(parts[1], 10);
     const seconds = parts.length > 2 ? parseInt(parts[2], 10) : 0;
-    
+
     now.setHours(hours);
     now.setMinutes(minutes);
     now.setSeconds(seconds);
-    
+
     return now.toISOString();
   }
 
@@ -47,21 +47,21 @@ export function formatTimeToISO(timeString?: string): string | undefined {
  */
 export function calculateDuration(startTime?: string, endTime?: string): string | undefined {
   if (!startTime || !endTime) return undefined;
-  
+
   try {
     const start = new Date(startTime);
     const end = new Date(endTime);
-    
+
     // Calculate the difference in milliseconds
     const diff = end.getTime() - start.getTime();
-    
+
     // Convert to hours, minutes, seconds
     const hours = Math.floor(diff / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
+
     // Format as HH:MM:SS
-    return `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    return `${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
   } catch (e) {
     return undefined;
   }
@@ -86,19 +86,19 @@ export function formatTimeAgo(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
   const diffInMs = now.getTime() - date.getTime();
-  
+
   const minutes = Math.floor(diffInMs / 60000);
   const hours = Math.floor(minutes / 60);
   const days = Math.floor(hours / 24);
-  
+
   if (days > 0) {
-    return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+    return `${days} ${days === 1 ? "day" : "days"} ago`;
   } else if (hours > 0) {
-    return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
   } else if (minutes > 0) {
-    return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
   } else {
-    return 'just now';
+    return "just now";
   }
 }
 
@@ -109,25 +109,25 @@ export function formatTimeAgo(dateString: string): string {
  */
 export function formatTimeWithTooltip(dateString: string): { text: string; tooltip: string } {
   const date = new Date(dateString);
-  
+
   // Format time ago for display
   const timeAgo = formatTimeAgo(dateString);
-  
+
   // Format full date and time for tooltip
   const tooltip = date.toLocaleString();
-  
+
   return { text: timeAgo, tooltip };
 }
 
 /**
  * Gets the start of today and end of today for filtering activities
  */
-export function getTodayDateRange(): { start: Date, end: Date } {
+export function getTodayDateRange(): { start: Date; end: Date } {
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
-  
+
   const todayEnd = new Date(todayStart);
   todayEnd.setDate(todayEnd.getDate() + 1);
-  
+
   return { start: todayStart, end: todayEnd };
-} 
+}

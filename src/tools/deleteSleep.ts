@@ -19,33 +19,31 @@ export const confirmation: Tool.Confirmation<DeleteSleepInput> = async () => {
   };
 };
 
-export default async function deleteSleep({
-  sleepId,
-}: DeleteSleepInput) {
+export default async function deleteSleep({ sleepId }: DeleteSleepInput) {
   const api = new BabyBuddyAPI();
-  
+
   try {
     await api.deleteSleep(sleepId);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Sleep Deleted",
       message: `Deleted sleep #${sleepId}`,
     });
-    
+
     return { success: true, sleepId };
   } catch (error) {
     let errorMessage = "Failed to delete sleep";
     if (axios.isAxiosError(error) && error.response) {
       errorMessage += `: ${JSON.stringify(error.response.data)}`;
     }
-    
+
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
       message: errorMessage,
     });
-    
+
     throw error;
   }
-} 
+}

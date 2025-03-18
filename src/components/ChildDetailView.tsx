@@ -3,14 +3,14 @@ import { useState, useEffect } from "react";
 import { BabyBuddyAPI } from "../api";
 import { Child, FeedingEntry, SleepEntry, DiaperEntry, TummyTimeEntry } from "../api";
 import { formatTimeAgo } from "../utils";
-import { 
-  calculateTotalFeedingAmount, 
-  calculateTotalSleepMinutes, 
+import {
+  calculateTotalFeedingAmount,
+  calculateTotalSleepMinutes,
   calculateTotalTummyTimeMinutes,
   countWetDiapers,
   countSolidDiapers,
   calculateTotalDiaperAmount,
-  calculateAge
+  calculateAge,
 } from "../utils/statistics";
 import { formatDuration } from "../utils/formatters";
 import { getTodayDateRange } from "../utils/date-helpers";

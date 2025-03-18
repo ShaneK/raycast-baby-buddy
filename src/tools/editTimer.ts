@@ -26,50 +26,44 @@ type EditTimerInput = {
   endTime?: string;
 };
 
-export default async function editTimer({
-  timerId,
-  childName,
-  timerName,
-  startTime,
-  endTime,
-}: EditTimerInput) {
+export default async function editTimer({ timerId, childName, timerName, startTime, endTime }: EditTimerInput) {
   const api = new BabyBuddyAPI();
-  
+
   // If childName is provided, look up the child ID
   if (childName) {
     const children = await api.getChildren();
     const child = findChildByName(children, childName);
-    
+
     if (!child) {
       throw new Error(`Child with name ${childName} not found`);
     }
-    
+
     // Note: We can't update the child association via the updateTimer API
     // If we need this functionality, we would need to extend the API
   }
-  
+
   // Prepare update data using utility function
   const updateData = prepareTimerUpdateData({
     timerName,
     startTime,
     endTime,
   });
-  
+
   // Only proceed if there's something to update
   if (Object.keys(updateData).length === 0) {
     return { message: "No updates provided" };
   }
-  
+
   try {
     // Update timer with all data at once
     const updatedTimer = await api.updateTimer(timerId, updateData);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Timer Updated",
       message: `Updated timer #${timerId}`,
     });
-    
+
     return updatedTimer;
   } catch (error) {
     await showToast({
@@ -77,7 +71,7 @@ export default async function editTimer({
       title: "Error",
       message: formatErrorMessage(error),
     });
-    
+
     throw error;
   }
-} 
+}

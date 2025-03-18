@@ -23,28 +23,28 @@ export default async function getDiapers({
 }: GetDiapersInput): Promise<(DiaperEntry & { childName: string })[]> {
   const api = new BabyBuddyAPI();
   const children = await api.getChildren();
-  
+
   // Find child using the utility function
   const child = findChildByName(children, childName);
-  
+
   if (!child) {
     throw new Error(`Child with name ${childName} not found`);
   }
-  
+
   let diapers: DiaperEntry[];
-  
+
   if (todayOnly) {
     diapers = await api.getTodayDiapers(child.id);
   } else {
     // Get recent diaper change entries
     diapers = await api.getRecentDiapers(child.id, limit);
   }
-  
+
   // Add child name to each diaper change entry
-  const enhancedDiapers = diapers.map(entry => ({
+  const enhancedDiapers = diapers.map((entry) => ({
     ...entry,
-    childName: `${child.first_name} ${child.last_name}`
+    childName: `${child.first_name} ${child.last_name}`,
   }));
-  
+
   return enhancedDiapers;
-} 
+}

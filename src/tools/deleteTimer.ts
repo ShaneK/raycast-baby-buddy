@@ -17,7 +17,7 @@ export const confirmation: Tool.Confirmation<DeleteTimerInput> = async (input) =
   const api = new BabyBuddyAPI();
   try {
     const timer = await api.getTimerById(input.timerId);
-    
+
     if (timer) {
       // Try to get child name for additional context
       let childName = "";
@@ -26,7 +26,7 @@ export const confirmation: Tool.Confirmation<DeleteTimerInput> = async (input) =
       } catch {
         // Ignore errors with getting child name
       }
-      
+
       return {
         style: Action.Style.Destructive,
         message: "Are you sure you want to delete this timer?",
@@ -46,8 +46,8 @@ export const confirmation: Tool.Confirmation<DeleteTimerInput> = async (input) =
           {
             name: "Timer ID",
             value: `#${input.timerId}`,
-          }
-        ]
+          },
+        ],
       };
     } else {
       return {
@@ -57,8 +57,8 @@ export const confirmation: Tool.Confirmation<DeleteTimerInput> = async (input) =
           {
             name: "Timer ID",
             value: `#${input.timerId}`,
-          }
-        ]
+          },
+        ],
       };
     }
   } catch (error) {
@@ -70,39 +70,37 @@ export const confirmation: Tool.Confirmation<DeleteTimerInput> = async (input) =
         {
           name: "Timer ID",
           value: `#${input.timerId}`,
-        }
-      ]
+        },
+      ],
     };
   }
 };
 
-export default async function deleteTimer({
-  timerId,
-}: DeleteTimerInput) {
+export default async function deleteTimer({ timerId }: DeleteTimerInput) {
   const api = new BabyBuddyAPI();
-  
+
   try {
     await api.deleteTimer(timerId);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Timer Deleted",
       message: `Deleted timer #${timerId}`,
     });
-    
+
     return { success: true, timerId };
   } catch (error) {
     let errorMessage = "Failed to delete timer";
     if (axios.isAxiosError(error) && error.response) {
       errorMessage += `: ${JSON.stringify(error.response.data)}`;
     }
-    
+
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
       message: errorMessage,
     });
-    
+
     throw error;
   }
-} 
+}

@@ -20,38 +20,36 @@ export const confirmation: Tool.Confirmation<DeleteFeedingInput> = async (input)
       {
         name: "Feeding ID",
         value: `#${input.feedingId}`,
-      }
-    ]
+      },
+    ],
   };
 };
 
-export default async function deleteFeeding({
-  feedingId,
-}: DeleteFeedingInput) {
+export default async function deleteFeeding({ feedingId }: DeleteFeedingInput) {
   const api = new BabyBuddyAPI();
-  
+
   try {
     await api.deleteFeeding(feedingId);
-    
+
     await showToast({
       style: Toast.Style.Success,
       title: "Feeding Deleted",
       message: `Deleted feeding #${feedingId}`,
     });
-    
+
     return { success: true, feedingId };
   } catch (error) {
     let errorMessage = "Failed to delete feeding";
     if (axios.isAxiosError(error) && error.response) {
       errorMessage += `: ${JSON.stringify(error.response.data)}`;
     }
-    
+
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
       message: errorMessage,
     });
-    
+
     throw error;
   }
-} 
+}
