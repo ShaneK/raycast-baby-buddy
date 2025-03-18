@@ -131,6 +131,21 @@ export class BabyBuddyAPI {
     return response.results;
   }
 
+  async getTimerById(timerId: number): Promise<Timer | null> {
+    try {
+      const response = await axios.get(`${this.baseUrl}/api/timers/${timerId}/`, {
+        headers: {
+          Authorization: `Token ${this.apiKey}`,
+          "Content-Type": "application/json",
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to get timer with ID ${timerId}:`, error);
+      return null;
+    }
+  }
+
   async getTimersByChild(childId: number): Promise<Timer[]> {
     const response = await this.request<{ results: Timer[] }>(`timers/?child=${childId}`);
     return response.results;

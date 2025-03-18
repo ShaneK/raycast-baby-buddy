@@ -1,4 +1,5 @@
 import { BabyBuddyAPI, FeedingEntry } from "../api";
+import { findChildByName } from "../utils/normalizers";
 
 type GetFeedingsInput = {
   /**
@@ -20,25 +21,15 @@ export default async function getFeedings({
   limit = 10,
   todayOnly = false,
 }: GetFeedingsInput): Promise<(FeedingEntry & { childName: string })[]> {
-  console.log(`getFeedings tool called with: childName=${childName}, limit=${limit}, todayOnly=${todayOnly}`);
-  
   const api = new BabyBuddyAPI();
   const children = await api.getChildren();
   
-  // More flexible child name matching
-  const child = children.find(
-    (c) =>
-      c.first_name.toLowerCase() === childName.toLowerCase() ||
-      c.first_name.toLowerCase().includes(childName.toLowerCase()) ||
-      `${c.first_name} ${c.last_name}`.toLowerCase() === childName.toLowerCase() ||
-      `${c.first_name} ${c.last_name}`.toLowerCase().includes(childName.toLowerCase()),
-  );
+  // Find child using the utility function
+  const child = findChildByName(children, childName);
   
   if (!child) {
     throw new Error(`Child with name ${childName} not found`);
   }
-  
-  console.log(`Found child: ${child.first_name} ${child.last_name} (ID: ${child.id})`);
   
   let feedings: FeedingEntry[];
   
@@ -54,8 +45,6 @@ export default async function getFeedings({
     ...feeding,
     childName: `${child.first_name} ${child.last_name}`
   }));
-  
-  console.log(`Retrieved ${enhancedFeedings.length} feedings`);
   
   return enhancedFeedings;
 } 

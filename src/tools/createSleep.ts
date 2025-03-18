@@ -1,6 +1,15 @@
 import { showToast, Toast } from "@raycast/api";
+import axios from "axios";
 import { BabyBuddyAPI } from "../api";
+import { calculateDuration, findChildByName, formatTimeToISO } from "../utils/normalizers";
 
+/**
+ * Create a new sleep entry for a child
+ * @param childName - The name of the child
+ * @param notes - Any notes about the sleep
+ * @param startTime - The start time of the sleep (ISO string). If not provided, 5 minutes ago will be used.
+ * @param endTime - The end time of the sleep (ISO string). If not provided, current time will be used.
+ */
 export default async function ({
   childName,
   notes = "",
@@ -14,55 +23,56 @@ export default async function ({
 }) {
   const api = new BabyBuddyAPI();
   const children = await api.getChildren();
-
-  // More flexible child name matching
-  const child = children.find(
-    (c) =>
-      c.first_name.toLowerCase() === childName.toLowerCase() ||
-      c.first_name.toLowerCase().includes(childName.toLowerCase()) ||
-      `${c.first_name} ${c.last_name}`.toLowerCase() === childName.toLowerCase() ||
-      `${c.first_name} ${c.last_name}`.toLowerCase().includes(childName.toLowerCase()),
-  );
-
+  
+  // Find child using the utility function
+  const child = findChildByName(children, childName);
+  
   if (!child) {
     throw new Error(`Child with name ${childName} not found`);
   }
-
+  
   // Set default times if not provided
   const now = new Date();
-  const defaultStartTime = new Date(now.getTime() - 60 * 60 * 1000); // 1 hour ago
-
-  const start = startTime || defaultStartTime.toISOString();
-  const end = endTime || now.toISOString();
-
-  // Calculate duration
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  const durationMs = endDate.getTime() - startDate.getTime();
-
-  // Format duration as HH:MM:SS
-  const durationHours = Math.floor(durationMs / (1000 * 60 * 60));
-  const durationMinutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
-  const durationSeconds = Math.floor((durationMs % (1000 * 60)) / 1000);
-
-  const duration = `${durationHours.toString().padStart(2, "0")}:${durationMinutes.toString().padStart(2, "0")}:${durationSeconds.toString().padStart(2, "0")}`;
-
+  const defaultStartTime = new Date(now.getTime() - 5 * 60 * 1000); // 5 minutes ago
+  
+  // Format times to ISO using utility function
+  const formattedStartTime = formatTimeToISO(startTime) || defaultStartTime.toISOString();
+  const formattedEndTime = formatTimeToISO(endTime) || now.toISOString();
+  
+  // Calculate duration using utility function
+  const duration = calculateDuration(formattedStartTime, formattedEndTime);
+  
   // Create the sleep entry
   const sleepData = {
     child: child.id,
-    start,
-    end,
+    start: formattedStartTime,
+    end: formattedEndTime,
     duration,
     notes,
   };
-
-  const newSleep = await api.createSleep(sleepData);
-
-  await showToast({
-    style: Toast.Style.Success,
-    title: "Sleep Created",
-    message: `Recorded sleep for ${child.first_name}`,
-  });
-
-  return newSleep;
+  
+  try {
+    const newSleep = await api.createSleep(sleepData);
+    
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Sleep Created",
+      message: `Recorded sleep session for ${child.first_name}`,
+    });
+    
+    return newSleep;
+  } catch (error) {
+    let errorMessage = "Failed to create sleep";
+    if (axios.isAxiosError(error) && error.response) {
+      errorMessage += `: ${JSON.stringify(error.response.data)}`;
+    }
+    
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Error",
+      message: errorMessage,
+    });
+    
+    throw error;
+  }
 }

@@ -1,56 +1,45 @@
 import { showToast, Toast } from "@raycast/api";
 import axios from "axios";
-import { BabyBuddyAPI, FeedingEntry } from "../api";
-import { calculateDuration, findChildByName, formatTimeToISO, normalizeMethod, normalizeType } from "../utils/normalizers";
+import { BabyBuddyAPI, SleepEntry } from "../api";
+import { calculateDuration, findChildByName, formatTimeToISO } from "../utils/normalizers";
 
-type EditFeedingInput = {
+type EditSleepInput = {
   /**
-   * The ID of the feeding entry to edit
+   * The ID of the sleep entry to edit
    */
-  feedingId: number;
+  sleepId: number;
   /**
-   * The name of the child this feeding is for
+   * The name of the child this sleep is for
    */
   childName?: string;
   /**
-   * Valid options are Breast Milk, Formula, Fortified Breast Milk, Solid Food
+   * Whether this is a nap (true) or night sleep (false)
    */
-  type?: string;
+  isNap?: boolean;
   /**
-   * Valid options are Bottle, left breast, right breast, both breasts
-   */
-  method?: string;
-  /**
-   * The amount of food or milk
-   */
-  amount?: string;
-  /**
-   * Notes about the feeding
+   * Notes about the sleep
    */
   notes?: string;
   /**
-   * Start time for the feeding (ISO string or HH:MM:SS format)
+   * Start time for the sleep (ISO string or HH:MM:SS format)
    */
   startTime?: string;
   /**
-   * End time for the feeding (ISO string or HH:MM:SS format)
+   * End time for the sleep (ISO string or HH:MM:SS format)
    */
   endTime?: string;
 };
 
-export default async function editFeeding({
-  feedingId,
+export default async function editSleep({
+  sleepId,
   childName,
-  type,
-  method,
-  amount,
+  isNap,
   notes,
   startTime,
   endTime,
-}: EditFeedingInput) {
+}: EditSleepInput) {
   const api = new BabyBuddyAPI();
   
-  // Fetch the existing feeding to have a reference
   let childId: number | undefined;
   
   // If childName is provided, look up the child ID
@@ -75,23 +64,14 @@ export default async function editFeeding({
     duration = calculateDuration(formattedStartTime, formattedEndTime);
   }
   
-  // Normalize type and method if provided
-  const normalizedType = type ? normalizeType(type) : undefined;
-  const normalizedMethod = method ? normalizeMethod(method) : undefined;
-  
-  // Convert amount to number or null if provided
-  const numericAmount = amount !== undefined ? (amount ? parseFloat(amount) : null) : undefined;
-  
   // Build the update data
-  const updateData: Partial<FeedingEntry> = {};
+  const updateData: Partial<SleepEntry> = {};
   
   if (childId !== undefined) updateData.child = childId;
   if (formattedStartTime !== undefined) updateData.start = formattedStartTime;
   if (formattedEndTime !== undefined) updateData.end = formattedEndTime;
   if (duration !== undefined) updateData.duration = duration;
-  if (normalizedType !== undefined) updateData.type = normalizedType;
-  if (normalizedMethod !== undefined) updateData.method = normalizedMethod;
-  if (numericAmount !== undefined) updateData.amount = numericAmount;
+  if (isNap !== undefined) updateData.nap = isNap;
   if (notes !== undefined) updateData.notes = notes;
   
   // Only proceed if there's something to update
@@ -100,17 +80,17 @@ export default async function editFeeding({
   }
   
   try {
-    const updatedFeeding = await api.updateFeeding(feedingId, updateData);
+    const updatedSleep = await api.updateSleep(sleepId, updateData);
     
     await showToast({
       style: Toast.Style.Success,
-      title: "Feeding Updated",
-      message: `Updated feeding #${feedingId}`,
+      title: "Sleep Updated",
+      message: `Updated sleep #${sleepId}`,
     });
     
-    return updatedFeeding;
+    return updatedSleep;
   } catch (error) {
-    let errorMessage = "Failed to update feeding";
+    let errorMessage = "Failed to update sleep";
     if (axios.isAxiosError(error) && error.response) {
       errorMessage += `: ${JSON.stringify(error.response.data)}`;
     }

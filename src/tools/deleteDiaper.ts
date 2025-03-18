@@ -2,46 +2,40 @@ import { Action, showToast, Toast, Tool } from "@raycast/api";
 import axios from "axios";
 import { BabyBuddyAPI } from "../api";
 
-type DeleteFeedingInput = {
+type DeleteDiaperInput = {
   /**
-   * The ID of the feeding entry to delete
+   * The ID of the diaper change entry to delete
    */
-  feedingId: number;
+  diaperId: number;
 };
 
 /**
  * Confirmation function that will be called before the action is executed
  */
-export const confirmation: Tool.Confirmation<DeleteFeedingInput> = async (input) => {
+export const confirmation: Tool.Confirmation<DeleteDiaperInput> = async () => {
   return {
     style: Action.Style.Destructive,
-    message: "Are you sure you want to delete this feeding entry?",
-    info: [
-      {
-        name: "Feeding ID",
-        value: `#${input.feedingId}`,
-      }
-    ]
+    message: "Are you sure you want to delete this diaper change?",
   };
 };
 
-export default async function deleteFeeding({
-  feedingId,
-}: DeleteFeedingInput) {
+export default async function deleteDiaper({
+  diaperId,
+}: DeleteDiaperInput) {
   const api = new BabyBuddyAPI();
   
   try {
-    await api.deleteFeeding(feedingId);
+    await api.deleteDiaper(diaperId);
     
     await showToast({
       style: Toast.Style.Success,
-      title: "Feeding Deleted",
-      message: `Deleted feeding #${feedingId}`,
+      title: "Diaper Change Deleted",
+      message: `Deleted diaper change #${diaperId}`,
     });
     
-    return { success: true, feedingId };
+    return { success: true, diaperId };
   } catch (error) {
-    let errorMessage = "Failed to delete feeding";
+    let errorMessage = "Failed to delete diaper change";
     if (axios.isAxiosError(error) && error.response) {
       errorMessage += `: ${JSON.stringify(error.response.data)}`;
     }
@@ -54,4 +48,4 @@ export default async function deleteFeeding({
     
     throw error;
   }
-} 
+}

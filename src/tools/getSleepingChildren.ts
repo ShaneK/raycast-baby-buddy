@@ -5,7 +5,7 @@ export default async function () {
   const activeTimers = await api.getActiveTimers();
 
   // Filter for sleep timers
-  const sleepTimers = activeTimers.filter((timer) => timer.name.toLowerCase() === "sleep");
+  const sleepTimers = activeTimers.filter((timer) => timer.name.toLowerCase().includes("sleep"));
 
   // Get children details for each sleep timer
   const children = await api.getChildren();

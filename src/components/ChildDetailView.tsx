@@ -2,7 +2,7 @@ import { ActionPanel, Action, Detail, Icon, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI } from "../api";
 import { Child, FeedingEntry, SleepEntry, DiaperEntry, TummyTimeEntry } from "../api";
-import { formatTimeAgo, formatTimeWithTooltip, formatFullTime } from "../utils";
+import { formatTimeAgo } from "../utils";
 import FeedingList from "./FeedingList";
 import SleepList from "./SleepList";
 import DiaperList from "./DiaperList";
@@ -69,41 +69,6 @@ export default function ChildDetailView({ child }: ChildDetailViewProps) {
             tummyTimeEndDate >= todayStart && tummyTimeEndDate < new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)
           );
         });
-
-        // Calculate totals
-        const totalFeedingAmount = todayFeedings.reduce((total, feeding) => {
-          return total + (feeding.amount || 0);
-        }, 0);
-
-        // Sleep is based on end time
-        const totalSleepMinutes = todaySleep.reduce((total, sleep) => {
-          // Parse the duration string (format: "HH:MM:SS")
-          const [hours, minutes] = sleep.duration.split(":").map(Number);
-          return total + (hours * 60 + minutes);
-        }, 0);
-
-        // Tummy time is based on end time
-        const totalTummyTimeMinutes = todayTummyTime.reduce((total, tummyTime) => {
-          // Parse the duration string (format: "HH:MM:SS")
-          const [hours, minutes] = tummyTime.duration.split(":").map(Number);
-          return total + (hours * 60 + minutes);
-        }, 0);
-
-        // Count wet and solid diapers
-        const wetDiapers = todayDiapers.filter((diaper) => diaper.wet).length;
-        const solidDiapers = todayDiapers.filter((diaper) => diaper.solid).length;
-
-        // Calculate total diaper amount
-        const totalDiaperAmount = todayDiapers.reduce((total, diaper) => {
-          return total + (diaper.amount || 0);
-        }, 0);
-
-        // Format durations for display
-        const formatDuration = (minutes: number) => {
-          const hours = Math.floor(minutes / 60);
-          const mins = minutes % 60;
-          return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-        };
 
         setStats({
           lastFeeding,

@@ -1,56 +1,45 @@
 import { showToast, Toast } from "@raycast/api";
 import axios from "axios";
-import { BabyBuddyAPI, FeedingEntry } from "../api";
-import { calculateDuration, findChildByName, formatTimeToISO, normalizeMethod, normalizeType } from "../utils/normalizers";
+import { BabyBuddyAPI, TummyTimeEntry } from "../api";
+import { calculateDuration, findChildByName, formatTimeToISO } from "../utils/normalizers";
 
-type EditFeedingInput = {
+type EditTummyTimeInput = {
   /**
-   * The ID of the feeding entry to edit
+   * The ID of the tummy time entry to edit
    */
-  feedingId: number;
+  tummyTimeId: number;
   /**
-   * The name of the child this feeding is for
+   * The name of the child this tummy time is for
    */
   childName?: string;
   /**
-   * Valid options are Breast Milk, Formula, Fortified Breast Milk, Solid Food
+   * Milestone achieved during tummy time
    */
-  type?: string;
+  milestone?: string;
   /**
-   * Valid options are Bottle, left breast, right breast, both breasts
-   */
-  method?: string;
-  /**
-   * The amount of food or milk
-   */
-  amount?: string;
-  /**
-   * Notes about the feeding
+   * Notes about the tummy time
    */
   notes?: string;
   /**
-   * Start time for the feeding (ISO string or HH:MM:SS format)
+   * Start time for the tummy time (ISO string or HH:MM:SS format)
    */
   startTime?: string;
   /**
-   * End time for the feeding (ISO string or HH:MM:SS format)
+   * End time for the tummy time (ISO string or HH:MM:SS format)
    */
   endTime?: string;
 };
 
-export default async function editFeeding({
-  feedingId,
+export default async function editTummyTime({
+  tummyTimeId,
   childName,
-  type,
-  method,
-  amount,
+  milestone,
   notes,
   startTime,
   endTime,
-}: EditFeedingInput) {
+}: EditTummyTimeInput) {
   const api = new BabyBuddyAPI();
   
-  // Fetch the existing feeding to have a reference
   let childId: number | undefined;
   
   // If childName is provided, look up the child ID
@@ -75,23 +64,14 @@ export default async function editFeeding({
     duration = calculateDuration(formattedStartTime, formattedEndTime);
   }
   
-  // Normalize type and method if provided
-  const normalizedType = type ? normalizeType(type) : undefined;
-  const normalizedMethod = method ? normalizeMethod(method) : undefined;
-  
-  // Convert amount to number or null if provided
-  const numericAmount = amount !== undefined ? (amount ? parseFloat(amount) : null) : undefined;
-  
   // Build the update data
-  const updateData: Partial<FeedingEntry> = {};
+  const updateData: Partial<TummyTimeEntry> = {};
   
   if (childId !== undefined) updateData.child = childId;
   if (formattedStartTime !== undefined) updateData.start = formattedStartTime;
   if (formattedEndTime !== undefined) updateData.end = formattedEndTime;
   if (duration !== undefined) updateData.duration = duration;
-  if (normalizedType !== undefined) updateData.type = normalizedType;
-  if (normalizedMethod !== undefined) updateData.method = normalizedMethod;
-  if (numericAmount !== undefined) updateData.amount = numericAmount;
+  if (milestone !== undefined) updateData.milestone = milestone;
   if (notes !== undefined) updateData.notes = notes;
   
   // Only proceed if there's something to update
@@ -100,17 +80,17 @@ export default async function editFeeding({
   }
   
   try {
-    const updatedFeeding = await api.updateFeeding(feedingId, updateData);
+    const updatedTummyTime = await api.updateTummyTime(tummyTimeId, updateData);
     
     await showToast({
       style: Toast.Style.Success,
-      title: "Feeding Updated",
-      message: `Updated feeding #${feedingId}`,
+      title: "Tummy Time Updated",
+      message: `Updated tummy time #${tummyTimeId}`,
     });
     
-    return updatedFeeding;
+    return updatedTummyTime;
   } catch (error) {
-    let errorMessage = "Failed to update feeding";
+    let errorMessage = "Failed to update tummy time";
     if (axios.isAxiosError(error) && error.response) {
       errorMessage += `: ${JSON.stringify(error.response.data)}`;
     }

@@ -1,83 +1,59 @@
 import { showToast, Toast } from "@raycast/api";
 import axios from "axios";
 import { BabyBuddyAPI } from "../api";
+import { findChildByName, formatTimeToISO } from "../utils/normalizers";
 
+/**
+ * Create a new timer for a child
+ * @param childName - The name of the child  
+ * @param name - Name for the timer (e.g., "Feeding", "Sleep", "Tummy Time")
+ * @param time - The start time for the timer. If not provided, current time will be used.
+ */
 export default async function ({
   childName,
-  timerName,
-  startTime,
+  name,
+  time,
 }: {
   childName: string;
-  timerName: string;
-  startTime?: string;
+  name: string;
+  time?: string;
 }) {
   const api = new BabyBuddyAPI();
   const children = await api.getChildren();
-
-  // More flexible child name matching
-  const child = children.find(
-    (c) =>
-      c.first_name.toLowerCase() === childName.toLowerCase() ||
-      c.first_name.toLowerCase().includes(childName.toLowerCase()) ||
-      `${c.first_name} ${c.last_name}`.toLowerCase() === childName.toLowerCase() ||
-      `${c.first_name} ${c.last_name}`.toLowerCase().includes(childName.toLowerCase()),
-  );
-
+  
+  // Find child using the utility function
+  const child = findChildByName(children, childName);
+  
   if (!child) {
     throw new Error(`Child with name ${childName} not found`);
   }
-
-  // Handle the startTime parameter
-  let formattedStartTime: string;
-
-  if (!startTime) {
-    // If no startTime provided, use current time
-    formattedStartTime = new Date().toISOString();
-  } else if (startTime.includes("T") && startTime.includes("-")) {
-    // If startTime is already in ISO format, use it directly
-    formattedStartTime = startTime;
-  } else if (startTime.includes(":")) {
-    // If startTime is in HH:MM:SS or HH:MM format, convert to ISO
-    const today = new Date();
-    const [hours, minutes, seconds = "00"] = startTime.split(":").map((part) => part.trim());
-
-    today.setHours(parseInt(hours, 10));
-    today.setMinutes(parseInt(minutes, 10));
-    today.setSeconds(parseInt(seconds, 10));
-    today.setMilliseconds(0);
-
-    formattedStartTime = today.toISOString();
-  } else {
-    // Default to current time if format is unrecognized
-    formattedStartTime = new Date().toISOString();
-  }
-
+  
+  // Format time to ISO using utility function
+  const formattedTime = formatTimeToISO(time) || new Date().toISOString();
+  
   try {
-    // Create the timer
-    const newTimer = await api.createTimer(child.id, timerName, formattedStartTime);
-
+    // Call API with the correct parameters
+    const newTimer = await api.createTimer(child.id, name, formattedTime);
+    
     await showToast({
       style: Toast.Style.Success,
-      title: "Timer Started",
-      message: `Started ${timerName} timer for ${child.first_name}`,
+      title: "Timer Created",
+      message: `Started ${name} timer for ${child.first_name}`,
     });
-
+    
     return newTimer;
   } catch (error) {
-    console.error("Failed to create timer:", error);
-
     let errorMessage = "Failed to create timer";
     if (axios.isAxiosError(error) && error.response) {
       errorMessage += `: ${JSON.stringify(error.response.data)}`;
-      console.error("API error response:", error.response.data);
     }
-
+    
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
       message: errorMessage,
     });
-
+    
     throw error;
   }
 }
