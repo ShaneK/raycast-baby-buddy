@@ -1,7 +1,8 @@
 import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, confirmAlert, Form } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child, DiaperEntry } from "../api";
-import { formatTimeAgo, formatTimeWithTooltip, getDiaperDescription } from "../utils";
+import { formatTimeAgo, formatTimeWithTooltip } from "../utils";
+import { formatErrorMessage } from "../utils/form-helpers";
 import CreateDiaperForm from "./CreateDiaperForm";
 
 // Define the available diaper colors
@@ -31,11 +32,10 @@ export default function DiaperList({ child }: DiaperListProps) {
       entries.sort((a: DiaperEntry, b: DiaperEntry) => new Date(b.time).getTime() - new Date(a.time).getTime());
       setDiaperEntries(entries);
     } catch (error) {
-      console.error("Failed to fetch diaper entries:", error);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Load Diaper Changes",
-        message: "Please try again later",
+        message: formatErrorMessage(error),
       });
     } finally {
       setIsLoading(false);
@@ -53,7 +53,7 @@ export default function DiaperList({ child }: DiaperListProps) {
         message: `Are you sure you want to delete this diaper change from ${formatTimeAgo(diaper.time)}?`,
         primaryAction: {
           title: "Delete",
-          style: Action.Style.Destructive as any,
+          style: Action.Style.Destructive as Action.Style,
         },
       })
     ) {
@@ -67,11 +67,10 @@ export default function DiaperList({ child }: DiaperListProps) {
         });
         fetchDiaperEntries();
       } catch (error) {
-        console.error("Failed to delete diaper change:", error);
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to Delete Diaper Change",
-          message: "Please try again later",
+          message: formatErrorMessage(error),
         });
       }
     }
@@ -221,7 +220,7 @@ function DiaperListItem({
           <Action
             title="Delete Diaper Change"
             icon={Icon.Trash}
-            style={Action.Style.Destructive as any}
+            style={Action.Style.Destructive as Action.Style}
             onAction={onDelete}
           />
           <Action title="Create Diaper Change" icon={Icon.Plus} onAction={onCreateDiaper} />
@@ -282,13 +281,11 @@ function EditDiaperForm({ diaper, onDiaperUpdated }: EditDiaperFormProps) {
 
       onDiaperUpdated();
     } catch (error) {
-      console.error("Failed to update diaper change:", error);
       setIsLoading(false);
-
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Update Diaper Change",
-        message: "Please try again later",
+        message: formatErrorMessage(error),
       });
     }
   }

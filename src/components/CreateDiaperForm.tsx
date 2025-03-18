@@ -1,16 +1,10 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { BabyBuddyAPI, Timer } from "../api";
-import axios from "axios";
-
-// Define the available diaper colors
-const DIAPER_COLORS = [
-  { id: "black", name: "Black" },
-  { id: "brown", name: "Brown" },
-  { id: "green", name: "Green" },
-  { id: "yellow", name: "Yellow" },
-  { id: "white", name: "White" },
-];
+import { DIAPER_COLORS } from "../utils/constants";
+import { formatDiaperData } from "../utils/form-helpers";
+import { formatErrorMessage } from "../utils/formatters";
+import { validateDiaperForm } from "../utils/validators";
 
 interface CreateDiaperFormProps {
   timer: Timer;
@@ -29,13 +23,8 @@ export default function CreateDiaperForm({ timer, childName, onEventCreated }: C
   const navigation = useNavigation();
 
   async function handleSubmit() {
-    // Validate that at least one of wet or solid is selected
-    if (!isWet && !isSolid) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid diaper change",
-        message: "At least one of Wet or Solid must be selected",
-      });
+    // Validate the form
+    if (!validateDiaperForm(isWet, isSolid)) {
       return;
     }
 
@@ -43,22 +32,16 @@ export default function CreateDiaperForm({ timer, childName, onEventCreated }: C
       setIsLoading(true);
       const api = new BabyBuddyAPI();
 
-      // Format date properly
-      const timeISOString = time.toISOString();
-
-      // Parse amount to number or null
-      const amountValue = amount ? parseFloat(amount) : null;
-
-      // Prepare the data
-      const diaperData = {
-        child: timer.child,
-        time: timeISOString,
-        wet: isWet,
-        solid: isSolid,
-        color: isSolid ? color : "",
-        amount: amountValue,
-        notes: notes || "",
-      };
+      // Format and prepare the data
+      const diaperData = formatDiaperData({
+        childId: timer.child,
+        time,
+        isWet,
+        isSolid,
+        color,
+        amount,
+        notes,
+      });
 
       // Create the diaper entry
       await api.createDiaper(diaperData);
@@ -80,28 +63,10 @@ export default function CreateDiaperForm({ timer, childName, onEventCreated }: C
       console.error("Failed to create diaper change:", error);
       setIsLoading(false);
 
-      let errorMessage = "Please try again";
-
-      // Check if it's an Axios error with response data
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const errorData = error.response.data;
-        if (typeof errorData === "object") {
-          // Join all error messages
-          const messages = Object.entries(errorData)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(", ");
-          if (messages) {
-            errorMessage = messages;
-          }
-        } else if (typeof errorData === "string") {
-          errorMessage = errorData;
-        }
-      }
-
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Create Diaper Change",
-        message: errorMessage,
+        message: formatErrorMessage(error),
       });
     }
   }

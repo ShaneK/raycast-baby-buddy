@@ -3,6 +3,18 @@ import { useState, useEffect } from "react";
 import { BabyBuddyAPI } from "../api";
 import { Child, FeedingEntry, SleepEntry, DiaperEntry, TummyTimeEntry } from "../api";
 import { formatTimeAgo } from "../utils";
+import { 
+  calculateTotalFeedingAmount, 
+  calculateTotalSleepMinutes, 
+  calculateTotalTummyTimeMinutes,
+  countWetDiapers,
+  countSolidDiapers,
+  calculateTotalDiaperAmount,
+  calculateAge
+} from "../utils/statistics";
+import { formatDuration } from "../utils/formatters";
+import { getTodayDateRange } from "../utils/date-helpers";
+import { formatDiaperDescription } from "../utils/formatters";
 import FeedingList from "./FeedingList";
 import SleepList from "./SleepList";
 import DiaperList from "./DiaperList";
@@ -57,17 +69,14 @@ export default function ChildDetailView({ child }: ChildDetailViewProps) {
         const allTummyTime = await api.getTodayTummyTime(child.id);
 
         // Filter activities to only include today's data
-        const todayStart = new Date();
-        todayStart.setHours(0, 0, 0, 0);
+        const { start: todayStart, end: todayEnd } = getTodayDateRange();
 
         const todayFeedings = allFeedings.filter((feeding) => new Date(feeding.start) >= todayStart);
         const todaySleep = allSleep.filter((sleep) => new Date(sleep.end) >= todayStart);
         const todayDiapers = allDiapers.filter((diaper) => new Date(diaper.time) >= todayStart);
         const todayTummyTime = allTummyTime.filter((tummyTime) => {
           const tummyTimeEndDate = new Date(tummyTime.end);
-          return (
-            tummyTimeEndDate >= todayStart && tummyTimeEndDate < new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)
-          );
+          return tummyTimeEndDate >= todayStart && tummyTimeEndDate < todayEnd;
         });
 
         setStats({
@@ -92,39 +101,20 @@ export default function ChildDetailView({ child }: ChildDetailViewProps) {
   }, [child.id]);
 
   // Calculate total feeding amount for today
-  const totalFeedingAmount = stats.todayFeedings.reduce((total, feeding) => {
-    return total + (feeding.amount || 0);
-  }, 0);
+  const totalFeedingAmount = calculateTotalFeedingAmount(stats.todayFeedings);
 
   // Calculate total sleep duration for today (in minutes)
-  const totalSleepMinutes = stats.todaySleep.reduce((total, sleep) => {
-    // Parse the duration string (format: "HH:MM:SS")
-    const [hours, minutes] = sleep.duration.split(":").map(Number);
-    return total + (hours * 60 + minutes);
-  }, 0);
+  const totalSleepMinutes = calculateTotalSleepMinutes(stats.todaySleep);
 
   // Calculate total tummy time duration for today (in minutes)
-  const totalTummyTimeMinutes = stats.todayTummyTime.reduce((total, tummyTime) => {
-    // Parse the duration string (format: "HH:MM:SS")
-    const [hours, minutes] = tummyTime.duration.split(":").map(Number);
-    return total + (hours * 60 + minutes);
-  }, 0);
+  const totalTummyTimeMinutes = calculateTotalTummyTimeMinutes(stats.todayTummyTime);
 
   // Count wet and solid diapers
-  const wetDiapers = stats.todayDiapers.filter((diaper) => diaper.wet).length;
-  const solidDiapers = stats.todayDiapers.filter((diaper) => diaper.solid).length;
+  const wetDiapers = countWetDiapers(stats.todayDiapers);
+  const solidDiapers = countSolidDiapers(stats.todayDiapers);
 
   // Calculate total diaper amount
-  const totalDiaperAmount = stats.todayDiapers.reduce((total, diaper) => {
-    return total + (diaper.amount || 0);
-  }, 0);
-
-  // Format durations for display
-  const formatDuration = (minutes: number) => {
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
-  };
+  const totalDiaperAmount = calculateTotalDiaperAmount(stats.todayDiapers);
 
   const markdown = `
 # ${child.first_name} ${child.last_name}
@@ -150,7 +140,7 @@ Total today: **${formatDuration(totalSleepMinutes)}**
 ## Diaper Changes
 ${
   stats.lastDiaper
-    ? `Last change: **${formatTimeAgo(stats.lastDiaper.time)}** (${stats.lastDiaper.wet ? "Wet" : ""}${stats.lastDiaper.wet && stats.lastDiaper.solid ? " & " : ""}${stats.lastDiaper.solid ? "Solid" : ""}${stats.lastDiaper.amount ? `, ${stats.lastDiaper.amount}` : ""})`
+    ? `Last change: **${formatTimeAgo(stats.lastDiaper.time)}** (${formatDiaperDescription(stats.lastDiaper)})`
     : "No recent diaper changes recorded"
 }
   
@@ -240,35 +230,4 @@ Total today: **${formatDuration(totalTummyTimeMinutes)}**
       navigationTitle={`${child.first_name} Details`}
     />
   );
-}
-
-// Helper function to calculate age from birth date
-function calculateAge(birthDate: string): string {
-  const birth = new Date(birthDate);
-  const now = new Date();
-
-  const yearDiff = now.getFullYear() - birth.getFullYear();
-  const monthDiff = now.getMonth() - birth.getMonth();
-  const dayDiff = now.getDate() - birth.getDate();
-
-  // Calculate age in months
-  let months = yearDiff * 12 + monthDiff;
-  if (dayDiff < 0) {
-    months--;
-  }
-
-  // For babies less than 2 years old, show months
-  if (months < 24) {
-    return `${months} month${months !== 1 ? "s" : ""}`;
-  }
-
-  // For children 2+ years old, show years and months
-  const years = Math.floor(months / 12);
-  const remainingMonths = months % 12;
-
-  if (remainingMonths === 0) {
-    return `${years} year${years !== 1 ? "s" : ""}`;
-  } else {
-    return `${years} year${years !== 1 ? "s" : ""}, ${remainingMonths} month${remainingMonths !== 1 ? "s" : ""}`;
-  }
 }

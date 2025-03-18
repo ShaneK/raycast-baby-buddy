@@ -1,7 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
-import axios from "axios";
 import { BabyBuddyAPI } from "../api";
-import { findChildByName, formatTimeToISO } from "../utils/normalizers";
+import { findChildByName } from "../utils/api-helpers";
+import { createTimerData } from "../utils/form-helpers";
+import { formatErrorMessage } from "../utils/formatters";
 
 /**
  * Create a new timer for a child
@@ -28,12 +29,16 @@ export default async function ({
     throw new Error(`Child with name ${childName} not found`);
   }
   
-  // Format time to ISO using utility function
-  const formattedTime = formatTimeToISO(time) || new Date().toISOString();
+  // Create timer data using utility function
+  const timerData = createTimerData({
+    childId: child.id,
+    name,
+    startTime: time ? new Date(time) : undefined,
+  });
   
   try {
     // Call API with the correct parameters
-    const newTimer = await api.createTimer(child.id, name, formattedTime);
+    const newTimer = await api.createTimer(child.id, timerData.name, timerData.start);
     
     await showToast({
       style: Toast.Style.Success,
@@ -43,15 +48,10 @@ export default async function ({
     
     return newTimer;
   } catch (error) {
-    let errorMessage = "Failed to create timer";
-    if (axios.isAxiosError(error) && error.response) {
-      errorMessage += `: ${JSON.stringify(error.response.data)}`;
-    }
-    
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
-      message: errorMessage,
+      message: formatErrorMessage(error),
     });
     
     throw error;

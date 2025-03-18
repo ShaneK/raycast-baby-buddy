@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
-import axios from "axios";
-import { BabyBuddyAPI, SleepEntry } from "../api";
-import { calculateDuration, findChildByName, formatTimeToISO } from "../utils/normalizers";
+import { BabyBuddyAPI } from "../api";
+import { formatErrorMessage, prepareSleepUpdateData } from "../utils/form-helpers";
+import { findChildByName } from "../utils/normalizers";
 
 type EditSleepInput = {
   /**
@@ -54,25 +54,14 @@ export default async function editSleep({
     childId = child.id;
   }
   
-  // Format times to ISO using utility function
-  const formattedStartTime = formatTimeToISO(startTime);
-  const formattedEndTime = formatTimeToISO(endTime);
-  
-  // Calculate duration if both start and end times are provided
-  let duration: string | undefined;
-  if (formattedStartTime && formattedEndTime) {
-    duration = calculateDuration(formattedStartTime, formattedEndTime);
-  }
-  
-  // Build the update data
-  const updateData: Partial<SleepEntry> = {};
-  
-  if (childId !== undefined) updateData.child = childId;
-  if (formattedStartTime !== undefined) updateData.start = formattedStartTime;
-  if (formattedEndTime !== undefined) updateData.end = formattedEndTime;
-  if (duration !== undefined) updateData.duration = duration;
-  if (isNap !== undefined) updateData.nap = isNap;
-  if (notes !== undefined) updateData.notes = notes;
+  // Prepare update data using utility function
+  const updateData = prepareSleepUpdateData({
+    childId,
+    startTime,
+    endTime,
+    isNap,
+    notes
+  });
   
   // Only proceed if there's something to update
   if (Object.keys(updateData).length === 0) {
@@ -90,15 +79,10 @@ export default async function editSleep({
     
     return updatedSleep;
   } catch (error) {
-    let errorMessage = "Failed to update sleep";
-    if (axios.isAxiosError(error) && error.response) {
-      errorMessage += `: ${JSON.stringify(error.response.data)}`;
-    }
-    
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
-      message: errorMessage,
+      message: formatErrorMessage(error),
     });
     
     throw error;

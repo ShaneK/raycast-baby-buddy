@@ -80,7 +80,6 @@ export default function CreateTummyTimeForm({ timer, childName, onEventCreated }
       // Call the callback to refresh and navigate
       onEventCreated();
     } catch (error: unknown) {
-      console.error("Failed to create tummy time:", error);
       setIsLoading(false);
 
       let errorMessage = "Please try again";

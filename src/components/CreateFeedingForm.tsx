@@ -1,30 +1,17 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BabyBuddyAPI, Timer } from "../api";
-import axios from "axios";
+import { FEEDING_TYPES, FEEDING_METHODS } from "../utils/constants";
+import { createFeedingData } from "../utils/form-helpers";
+import { formatErrorMessage } from "../utils/formatters";
+import { showInvalidTimeRangeError } from "../utils/validators";
+import { validateTimeRange } from "../utils/date-helpers";
 
 interface CreateFeedingFormProps {
   timer: Timer;
   childName: string;
   onEventCreated: () => void;
 }
-
-// Feeding types and methods from Baby Buddy
-const FEEDING_TYPES = [
-  { id: "breast milk", name: "Breast Milk" },
-  { id: "formula", name: "Formula" },
-  { id: "solid food", name: "Solid Food" },
-  { id: "fortified breast milk", name: "Fortified Breast Milk" },
-];
-
-const FEEDING_METHODS = [
-  { id: "bottle", name: "Bottle" },
-  { id: "left breast", name: "Left Breast" },
-  { id: "right breast", name: "Right Breast" },
-  { id: "both breasts", name: "Both Breasts" },
-  { id: "parent fed", name: "Parent Fed" },
-  { id: "self fed", name: "Self Fed" },
-];
 
 export default function CreateFeedingForm({ timer, childName, onEventCreated }: CreateFeedingFormProps) {
   const [isLoading, setIsLoading] = useState(false);
@@ -46,24 +33,26 @@ export default function CreateFeedingForm({ timer, childName, onEventCreated }: 
   const navigation = useNavigation();
 
   async function handleSubmit(values: { type: string; method: string; amount?: string; notes?: string }) {
+    // Validate that end time is after start time
+    if (!validateTimeRange(startTime, endTime)) {
+      showInvalidTimeRangeError();
+      return;
+    }
+
     try {
       setIsLoading(true);
       const api = new BabyBuddyAPI();
 
-      // Format dates properly
-      const startISOString = startTime.toISOString();
-      const endISOString = endTime.toISOString();
-
-      // Prepare the data
-      const feedingData = {
-        child: timer.child,
-        start: startISOString,
-        end: endISOString,
+      // Format and prepare the data using utility function
+      const feedingData = createFeedingData({
+        childId: timer.child,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
         type: values.type,
         method: values.method,
-        amount: values.amount ? parseFloat(values.amount) : null,
+        amount: values.amount,
         notes: values.notes || "",
-      };
+      });
 
       // Create the feeding entry
       await api.createFeeding(feedingData);
@@ -85,39 +74,16 @@ export default function CreateFeedingForm({ timer, childName, onEventCreated }: 
       console.error("Failed to create feeding:", error);
       setIsLoading(false);
 
-      let errorMessage = "Please try again";
-
-      // Check if it's an Axios error with response data
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const errorData = error.response.data;
-        if (typeof errorData === "object") {
-          // Join all error messages
-          const messages = Object.entries(errorData)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(", ");
-          if (messages) {
-            errorMessage = messages;
-          }
-        } else if (typeof errorData === "string") {
-          errorMessage = errorData;
-        }
-      }
-
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Create Feeding",
-        message: errorMessage,
+        message: formatErrorMessage(error),
       });
     }
   }
 
   // Validate that end time is after start time
-  const isTimeRangeValid = endTime > startTime;
-
-  // Use useEffect to handle validation side effects
-  useEffect(() => {
-    // Empty effect to avoid linter warnings about dependencies
-  }, [isTimeRangeValid]);
+  const isTimeRangeValid = validateTimeRange(startTime, endTime);
 
   return (
     <Form

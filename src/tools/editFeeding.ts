@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
-import axios from "axios";
-import { BabyBuddyAPI, FeedingEntry } from "../api";
-import { calculateDuration, findChildByName, formatTimeToISO, normalizeMethod, normalizeType } from "../utils/normalizers";
+import { BabyBuddyAPI } from "../api";
+import { formatErrorMessage, prepareFeedingUpdateData } from "../utils/form-helpers";
+import { findChildByName } from "../utils/normalizers";
 
 type EditFeedingInput = {
   /**
@@ -50,7 +50,6 @@ export default async function editFeeding({
 }: EditFeedingInput) {
   const api = new BabyBuddyAPI();
   
-  // Fetch the existing feeding to have a reference
   let childId: number | undefined;
   
   // If childName is provided, look up the child ID
@@ -65,34 +64,16 @@ export default async function editFeeding({
     childId = child.id;
   }
   
-  // Format times to ISO using utility function
-  const formattedStartTime = formatTimeToISO(startTime);
-  const formattedEndTime = formatTimeToISO(endTime);
-  
-  // Calculate duration if both start and end times are provided
-  let duration: string | undefined;
-  if (formattedStartTime && formattedEndTime) {
-    duration = calculateDuration(formattedStartTime, formattedEndTime);
-  }
-  
-  // Normalize type and method if provided
-  const normalizedType = type ? normalizeType(type) : undefined;
-  const normalizedMethod = method ? normalizeMethod(method) : undefined;
-  
-  // Convert amount to number or null if provided
-  const numericAmount = amount !== undefined ? (amount ? parseFloat(amount) : null) : undefined;
-  
-  // Build the update data
-  const updateData: Partial<FeedingEntry> = {};
-  
-  if (childId !== undefined) updateData.child = childId;
-  if (formattedStartTime !== undefined) updateData.start = formattedStartTime;
-  if (formattedEndTime !== undefined) updateData.end = formattedEndTime;
-  if (duration !== undefined) updateData.duration = duration;
-  if (normalizedType !== undefined) updateData.type = normalizedType;
-  if (normalizedMethod !== undefined) updateData.method = normalizedMethod;
-  if (numericAmount !== undefined) updateData.amount = numericAmount;
-  if (notes !== undefined) updateData.notes = notes;
+  // Prepare update data using utility function
+  const updateData = prepareFeedingUpdateData({
+    childId,
+    startTime,
+    endTime,
+    type,
+    method,
+    amount,
+    notes
+  });
   
   // Only proceed if there's something to update
   if (Object.keys(updateData).length === 0) {
@@ -110,15 +91,10 @@ export default async function editFeeding({
     
     return updatedFeeding;
   } catch (error) {
-    let errorMessage = "Failed to update feeding";
-    if (axios.isAxiosError(error) && error.response) {
-      errorMessage += `: ${JSON.stringify(error.response.data)}`;
-    }
-    
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
-      message: errorMessage,
+      message: formatErrorMessage(error),
     });
     
     throw error;

@@ -2,6 +2,7 @@ import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, confi
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child, SleepEntry } from "../api";
 import { formatTimeAgo, formatTimeWithTooltip } from "../utils";
+import { formatErrorMessage } from "../utils/form-helpers";
 import CreateSleepForm from "./CreateSleepForm";
 
 interface SleepListProps {
@@ -21,11 +22,10 @@ export default function SleepList({ child }: SleepListProps) {
       setSleepEntries(sleepData);
       setIsLoading(false);
     } catch (error) {
-      console.error("Failed to fetch sleep entries:", error);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch sleep entries",
-        message: "Please check your connection and try again",
+        message: formatErrorMessage(error),
       });
       setIsLoading(false);
     }
@@ -55,11 +55,10 @@ export default function SleepList({ child }: SleepListProps) {
         });
         fetchSleepEntries();
       } catch (error) {
-        console.error("Failed to delete sleep entry:", error);
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to delete sleep entry",
-          message: "Please try again",
+          message: formatErrorMessage(error),
         });
         setIsLoading(false);
       }
@@ -249,13 +248,12 @@ function EditSleepForm({ sleep, childName, onSleepUpdated }: EditSleepFormProps)
       onSleepUpdated();
       navigation.pop();
     } catch (error) {
-      console.error("Failed to update sleep entry:", error);
+      setIsLoading(false);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to update sleep entry",
-        message: "Please try again",
+        message: formatErrorMessage(error),
       });
-      setIsLoading(false);
     }
   }
 

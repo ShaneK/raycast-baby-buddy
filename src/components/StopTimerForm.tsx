@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation, Icon, confirmAlert } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Timer } from "../api";
+import { formatErrorMessage } from "../utils/formatters";
 
 interface StopTimerFormProps {
   timer: Timer;
@@ -171,12 +172,11 @@ export default function StopTimerForm({
         }
       }
     } catch (error) {
-      console.error("Failed to process timer:", error);
       setIsLoading(false);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Process Timer",
-        message: "Please try again",
+        message: formatErrorMessage(error),
       });
     }
   }
@@ -204,12 +204,11 @@ export default function StopTimerForm({
         onTimerDeleted();
         pop();
       } catch (error) {
-        console.error("Failed to delete timer:", error);
         setIsLoading(false);
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to Delete Timer",
-          message: "Please try again",
+          message: formatErrorMessage(error),
         });
       }
     }
@@ -238,12 +237,11 @@ export default function StopTimerForm({
         onTimerReset();
         pop();
       } catch (error) {
-        console.error("Failed to reset timer:", error);
         setIsLoading(false);
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to Reset Timer",
-          message: "Please try again",
+          message: formatErrorMessage(error),
         });
       }
     }

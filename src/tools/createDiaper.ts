@@ -1,7 +1,9 @@
 import { showToast, Toast } from "@raycast/api";
-import axios from "axios";
 import { BabyBuddyAPI } from "../api";
-import { findChildByName, formatTimeToISO, getContentsDescription, normalizeContents } from "../utils/normalizers";
+import { findChildByName } from "../utils/api-helpers";
+import { formatDiaperDataFromContents } from "../utils/form-helpers";
+import { formatErrorMessage } from "../utils/formatters";
+import { formatTimeToISO, getContentsDescription, normalizeContents } from "../utils/normalizers";
 
 /**
  * Create a new diaper change entry for a child
@@ -48,19 +50,15 @@ export default async function ({
   // Normalize contents using utility function
   const normalizedContents = normalizeContents(contents);
   
-  // Convert amount to number or null
-  const numericAmount = amount ? parseFloat(amount) : null;
-  
-  // Create the diaper change entry
-  const diaperData = {
-    child: child.id,
+  // Format and prepare the data using utility function
+  const diaperData = formatDiaperDataFromContents({
+    childId: child.id,
     time: formattedTime,
-    wet: normalizedContents.wet,
-    solid: normalizedContents.solid,
+    contents,
     color,
-    amount: numericAmount,
+    amount,
     notes,
-  };
+  });
   
   try {
     const newDiaper = await api.createDiaper(diaperData);
@@ -73,15 +71,10 @@ export default async function ({
     
     return newDiaper;
   } catch (error) {
-    let errorMessage = "Failed to create diaper change";
-    if (axios.isAxiosError(error) && error.response) {
-      errorMessage += `: ${JSON.stringify(error.response.data)}`;
-    }
-    
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
-      message: errorMessage,
+      message: formatErrorMessage(error),
     });
     
     throw error;

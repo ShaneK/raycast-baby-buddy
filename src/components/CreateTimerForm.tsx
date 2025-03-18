@@ -1,19 +1,12 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child } from "../api";
+import { TIMER_TYPES } from "../utils/constants";
+import { formatErrorMessage, getTimerName } from "../utils/form-helpers";
 
 interface CreateTimerFormProps {
   onTimerCreated: () => void;
 }
-
-// Common timer types in Baby Buddy
-const TIMER_TYPES = [
-  { id: "feeding", name: "Feeding" },
-  { id: "pumping", name: "Pumping" },
-  { id: "sleep", name: "Sleep" },
-  { id: "tummy-time", name: "Tummy Time" },
-  { id: "other", name: "Other" },
-];
 
 export default function CreateTimerForm({ onTimerCreated }: CreateTimerFormProps) {
   const [isLoading, setIsLoading] = useState(true);
@@ -31,12 +24,12 @@ export default function CreateTimerForm({ onTimerCreated }: CreateTimerFormProps
         const childrenData = await api.getChildren();
         setChildren(childrenData);
         setIsLoading(false);
-      } catch (e) {
+      } catch (error) {
         setIsLoading(false);
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to fetch children",
-          message: "Please check your Baby Buddy URL and API key",
+          message: formatErrorMessage(error),
         });
       }
     }
@@ -49,15 +42,8 @@ export default function CreateTimerForm({ onTimerCreated }: CreateTimerFormProps
       const api = new BabyBuddyAPI();
       const childId = parseInt(values.childId);
 
-      // Determine the timer name
-      let timerName =
-        values.timerType === "other"
-          ? values.customName
-          : TIMER_TYPES.find((t) => t.id === values.timerType)?.name || values.customName;
-
-      if (!timerName.trim()) {
-        timerName = "Timer";
-      }
+      // Determine the timer name using the utility function
+      const timerName = getTimerName(values.timerType, values.customName);
 
       // Use the datetime directly
       const startISOString = values.startDateTime.toISOString();
@@ -77,7 +63,7 @@ export default function CreateTimerForm({ onTimerCreated }: CreateTimerFormProps
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Create Timer",
-        message: "Please try again",
+        message: formatErrorMessage(error),
       });
     }
   }

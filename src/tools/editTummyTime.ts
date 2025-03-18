@@ -1,6 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
-import axios from "axios";
 import { BabyBuddyAPI, TummyTimeEntry } from "../api";
+import { formatErrorMessage } from "../utils/form-helpers";
 import { calculateDuration, findChildByName, formatTimeToISO } from "../utils/normalizers";
 
 type EditTummyTimeInput = {
@@ -90,15 +90,10 @@ export default async function editTummyTime({
     
     return updatedTummyTime;
   } catch (error) {
-    let errorMessage = "Failed to update tummy time";
-    if (axios.isAxiosError(error) && error.response) {
-      errorMessage += `: ${JSON.stringify(error.response.data)}`;
-    }
-    
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
-      message: errorMessage,
+      message: formatErrorMessage(error),
     });
     
     throw error;

@@ -2,6 +2,7 @@ import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Form }
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child, FeedingEntry } from "../api";
 import { formatTimeAgo, formatTimeWithTooltip } from "../utils";
+import { formatErrorMessage } from "../utils/form-helpers";
 import CreateFeedingForm from "./CreateFeedingForm";
 
 interface FeedingListProps {
@@ -21,11 +22,10 @@ export default function FeedingList({ child }: FeedingListProps) {
       setFeedings(feedingsData);
       setIsLoading(false);
     } catch (error) {
-      console.error("Failed to fetch feedings:", error);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch feedings",
-        message: "Please check your connection and try again",
+        message: formatErrorMessage(error),
       });
       setIsLoading(false);
     }
@@ -54,11 +54,10 @@ export default function FeedingList({ child }: FeedingListProps) {
         });
         fetchFeedings();
       } catch (error) {
-        console.error("Failed to delete feeding:", error);
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to delete feeding",
-          message: "Please try again",
+          message: formatErrorMessage(error),
         });
         setIsLoading(false);
       }
@@ -249,13 +248,12 @@ function EditFeedingForm({ feeding, childName, onFeedingUpdated }: EditFeedingFo
 
       onFeedingUpdated();
     } catch (error) {
-      console.error("Failed to update feeding:", error);
+      setIsLoading(false);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to update feeding",
-        message: "Please try again",
+        message: formatErrorMessage(error),
       });
-      setIsLoading(false);
     }
   }
 

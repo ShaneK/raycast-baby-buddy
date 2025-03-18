@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { BabyBuddyAPI, Timer } from "../api";
+import { formatErrorMessage, prepareTimerUpdateData } from "../utils/form-helpers";
 
 interface EditTimerFormProps {
   timer: Timer;
@@ -19,11 +20,14 @@ export default function EditTimerForm({ timer, childName, onTimerUpdated }: Edit
       setIsLoading(true);
       const api = new BabyBuddyAPI();
 
-      // Update the timer with new name and start time
-      await api.updateTimer(timer.id, {
-        name: timerName,
-        start: startDateTime.toISOString(),
+      // Format data using the utility function
+      const updateData = prepareTimerUpdateData({
+        timerName,
+        startTime: startDateTime.toISOString(),
       });
+
+      // Update the timer
+      await api.updateTimer(timer.id, updateData);
 
       await showToast({
         style: Toast.Style.Success,
@@ -34,12 +38,11 @@ export default function EditTimerForm({ timer, childName, onTimerUpdated }: Edit
       onTimerUpdated();
       pop();
     } catch (error) {
-      console.error("Failed to update timer:", error);
       setIsLoading(false);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Update Timer",
-        message: "Please try again",
+        message: formatErrorMessage(error),
       });
     }
   }

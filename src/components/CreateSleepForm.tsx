@@ -1,7 +1,10 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { BabyBuddyAPI, Timer } from "../api";
-import axios from "axios";
+import { createSleepData } from "../utils/form-helpers";
+import { formatErrorMessage } from "../utils/formatters";
+import { showInvalidTimeRangeError } from "../utils/validators";
+import { validateTimeRange } from "../utils/date-helpers";
 
 interface CreateSleepFormProps {
   timer: Timer;
@@ -31,20 +34,11 @@ export default function CreateSleepForm({ timer, childName, onEventCreated }: Cr
   const navigation = useNavigation();
 
   // Validate that end time is after start time
-  const isTimeRangeValid = endTime > startTime;
-
-  // Use useEffect to handle validation side effects
-  useEffect(() => {
-    // Empty effect to avoid linter warnings about dependencies
-  }, [isTimeRangeValid]);
+  const isTimeRangeValid = validateTimeRange(startTime, endTime);
 
   async function handleSubmit() {
     if (!isTimeRangeValid) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid time range",
-        message: "End time must be after start time",
-      });
+      showInvalidTimeRangeError();
       return;
     }
 
@@ -52,18 +46,14 @@ export default function CreateSleepForm({ timer, childName, onEventCreated }: Cr
       setIsLoading(true);
       const api = new BabyBuddyAPI();
 
-      // Format dates properly
-      const startISOString = startTime.toISOString();
-      const endISOString = endTime.toISOString();
-
-      // Prepare the data
-      const sleepData = {
-        child: timer.child,
-        start: startISOString,
-        end: endISOString,
-        nap: isNap,
-        notes: notes || "",
-      };
+      // Format and prepare the data using utility function
+      const sleepData = createSleepData({
+        childId: timer.child,
+        startTime: startTime.toISOString(),
+        endTime: endTime.toISOString(),
+        isNap,
+        notes,
+      });
 
       // Create the sleep entry
       await api.createSleep(sleepData);
@@ -85,28 +75,10 @@ export default function CreateSleepForm({ timer, childName, onEventCreated }: Cr
       console.error("Failed to create sleep entry:", error);
       setIsLoading(false);
 
-      let errorMessage = "Please try again";
-
-      // Check if it's an Axios error with response data
-      if (axios.isAxiosError(error) && error.response?.data) {
-        const errorData = error.response.data;
-        if (typeof errorData === "object") {
-          // Join all error messages
-          const messages = Object.entries(errorData)
-            .map(([key, value]) => `${key}: ${value}`)
-            .join(", ");
-          if (messages) {
-            errorMessage = messages;
-          }
-        } else if (typeof errorData === "string") {
-          errorMessage = errorData;
-        }
-      }
-
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Create Sleep Entry",
-        message: errorMessage,
+        message: formatErrorMessage(error),
       });
     }
   }

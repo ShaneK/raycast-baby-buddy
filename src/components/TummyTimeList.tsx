@@ -2,6 +2,7 @@ import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, confi
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child, TummyTimeEntry } from "../api";
 import { formatTimeAgo, formatTimeWithTooltip } from "../utils";
+import { formatErrorMessage } from "../utils/form-helpers";
 import CreateTummyTimeForm from "./CreateTummyTimeForm";
 
 interface TummyTimeListProps {
@@ -22,11 +23,10 @@ export default function TummyTimeList({ child }: TummyTimeListProps) {
       entries.sort((a: TummyTimeEntry, b: TummyTimeEntry) => new Date(b.end).getTime() - new Date(a.end).getTime());
       setTummyTimeEntries(entries);
     } catch (error) {
-      console.error("Failed to fetch tummy time entries:", error);
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Load Tummy Time",
-        message: "Please try again later",
+        message: formatErrorMessage(error),
       });
     } finally {
       setIsLoading(false);
@@ -44,7 +44,7 @@ export default function TummyTimeList({ child }: TummyTimeListProps) {
         message: `Are you sure you want to delete this tummy time from ${formatTimeAgo(tummyTime.end)}?`,
         primaryAction: {
           title: "Delete",
-          style: Action.Style.Destructive as any,
+          style: Action.Style.Destructive,
         },
       })
     ) {
@@ -58,11 +58,10 @@ export default function TummyTimeList({ child }: TummyTimeListProps) {
         });
         fetchTummyTimeEntries();
       } catch (error) {
-        console.error("Failed to delete tummy time:", error);
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to Delete Tummy Time",
-          message: "Please try again later",
+          message: formatErrorMessage(error),
         });
       }
     }
@@ -178,7 +177,7 @@ function TummyTimeListItem({
           <Action
             title="Delete Tummy Time"
             icon={Icon.Trash}
-            style={Action.Style.Destructive as any}
+            style={Action.Style.Destructive}
             onAction={onDelete}
           />
           <Action title="Create Tummy Time" icon={Icon.Plus} onAction={onCreateTummyTime} />
@@ -233,13 +232,11 @@ function EditTummyTimeForm({ tummyTime, onTummyTimeUpdated }: EditTummyTimeFormP
 
       onTummyTimeUpdated();
     } catch (error) {
-      console.error("Failed to update tummy time:", error);
       setIsLoading(false);
-
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to Update Tummy Time",
-        message: "Please try again later",
+        message: formatErrorMessage(error),
       });
     }
   }

@@ -1,7 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
-import axios from "axios";
-import { BabyBuddyAPI, DiaperEntry } from "../api";
-import { findChildByName, formatTimeToISO } from "../utils/normalizers";
+import { BabyBuddyAPI } from "../api";
+import { formatErrorMessage, prepareDiaperUpdateData } from "../utils/form-helpers";
+import { findChildByName } from "../utils/normalizers";
 
 type EditDiaperInput = {
   /**
@@ -64,22 +64,16 @@ export default async function editDiaper({
     childId = child.id;
   }
   
-  // Format time to ISO using utility function
-  const formattedTime = formatTimeToISO(time);
-  
-  // Convert amount to number or null if provided
-  const numericAmount = amount !== undefined ? (amount ? parseFloat(amount) : null) : undefined;
-  
-  // Build the update data
-  const updateData: Partial<DiaperEntry> = {};
-  
-  if (childId !== undefined) updateData.child = childId;
-  if (formattedTime !== undefined) updateData.time = formattedTime;
-  if (wet !== undefined) updateData.wet = wet;
-  if (solid !== undefined) updateData.solid = solid;
-  if (color !== undefined) updateData.color = color;
-  if (numericAmount !== undefined) updateData.amount = numericAmount;
-  if (notes !== undefined) updateData.notes = notes;
+  // Prepare update data using utility function
+  const updateData = prepareDiaperUpdateData({
+    childId,
+    time,
+    wet,
+    solid,
+    color,
+    amount,
+    notes
+  });
   
   // Only proceed if there's something to update
   if (Object.keys(updateData).length === 0) {
@@ -97,15 +91,10 @@ export default async function editDiaper({
     
     return updatedDiaper;
   } catch (error) {
-    let errorMessage = "Failed to update diaper change";
-    if (axios.isAxiosError(error) && error.response) {
-      errorMessage += `: ${JSON.stringify(error.response.data)}`;
-    }
-    
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
-      message: errorMessage,
+      message: formatErrorMessage(error),
     });
     
     throw error;

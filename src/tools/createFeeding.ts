@@ -1,7 +1,8 @@
 import { showToast, Toast } from "@raycast/api";
-import axios from "axios";
 import { BabyBuddyAPI } from "../api";
-import { calculateDuration, findChildByName, formatTimeToISO, normalizeMethod, normalizeType } from "../utils/normalizers";
+import { findChildByName } from "../utils/api-helpers";
+import { createFeedingData } from "../utils/form-helpers";
+import { formatErrorMessage } from "../utils/formatters";
 
 /**
  * Create a new feeding entry for a child
@@ -40,35 +41,16 @@ export default async function ({
     throw new Error(`Child with name ${childName} not found`);
   }
   
-  // Set default times if not provided
-  const now = new Date();
-  const defaultStartTime = new Date(now.getTime() - 5 * 60 * 1000); // 5 minutes ago
-  
-  // Format times to ISO using utility function
-  const formattedStartTime = formatTimeToISO(startTime) || defaultStartTime.toISOString();
-  const formattedEndTime = formatTimeToISO(endTime) || now.toISOString();
-  
-  // Calculate duration using utility function
-  const duration = calculateDuration(formattedStartTime, formattedEndTime);
-  
-  // Convert amount to number or null
-  const numericAmount = amount ? parseFloat(amount) : null;
-  
-  // Normalize type and method values using utility functions
-  const normalizedType = normalizeType(type);
-  const normalizedMethod = normalizeMethod(method);
-  
-  // Create the feeding entry
-  const feedingData = {
-    child: child.id,
-    start: formattedStartTime,
-    end: formattedEndTime,
-    duration,
-    type: normalizedType,
-    method: normalizedMethod,
-    amount: numericAmount,
+  // Create complete feeding data using utility function
+  const feedingData = createFeedingData({
+    childId: child.id,
+    startTime,
+    endTime,
+    type,
+    method,
+    amount,
     notes,
-  };
+  });
   
   try {
     const newFeeding = await api.createFeeding(feedingData);
@@ -76,20 +58,15 @@ export default async function ({
     await showToast({
       style: Toast.Style.Success,
       title: "Feeding Created",
-      message: `Recorded ${normalizedType} feeding for ${child.first_name}`,
+      message: `Recorded ${feedingData.type} feeding for ${child.first_name}`,
     });
     
     return newFeeding;
   } catch (error) {
-    let errorMessage = "Failed to create feeding";
-    if (axios.isAxiosError(error) && error.response) {
-      errorMessage += `: ${JSON.stringify(error.response.data)}`;
-    }
-    
     await showToast({
       style: Toast.Style.Failure,
       title: "Error",
-      message: errorMessage,
+      message: formatErrorMessage(error),
     });
     
     throw error;
