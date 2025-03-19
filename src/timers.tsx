@@ -105,6 +105,10 @@ export default function Command() {
 
 function TimerListItem({ timer, onTimerStopped }: { timer: TimerWithDetails; onTimerStopped: () => void }) {
   const getTimerIcon = (timerName: string) => {
+    if (!timerName) {
+      return { source: Icon.Clock, tintColor: Color.Green };
+    }
+
     const name = timerName.toLowerCase();
     if (name.includes("feed") || name.includes("nursing") || name.includes("bottle")) {
       return { source: Icon.Mug, tintColor: Color.Blue };
@@ -125,7 +129,7 @@ function TimerListItem({ timer, onTimerStopped }: { timer: TimerWithDetails; onT
     // Show confirmation dialog before deleting
     const options = {
       title: "Delete Timer",
-      message: `Are you sure you want to delete the "${timer.name}" timer for ${timer.childName}?`,
+      message: `Are you sure you want to delete the "${timer.name || "Unnamed Timer"}" timer for ${timer.childName}?`,
       icon: Icon.Trash,
     };
 
@@ -137,7 +141,7 @@ function TimerListItem({ timer, onTimerStopped }: { timer: TimerWithDetails; onT
         await showToast({
           style: Toast.Style.Success,
           title: "Timer Deleted",
-          message: `${timer.name} timer deleted`,
+          message: `${timer.name || "Unnamed Timer"} timer deleted`,
         });
 
         onTimerStopped(); // Refresh the timer list
@@ -155,7 +159,7 @@ function TimerListItem({ timer, onTimerStopped }: { timer: TimerWithDetails; onT
     // Show confirmation dialog before resetting
     const options = {
       title: "Reset Timer",
-      message: `Are you sure you want to reset the "${timer.name}" timer for ${timer.childName}?`,
+      message: `Are you sure you want to reset the "${timer.name || "Unnamed Timer"}" timer for ${timer.childName}?`,
       icon: Icon.ArrowClockwise,
     };
 
@@ -167,7 +171,7 @@ function TimerListItem({ timer, onTimerStopped }: { timer: TimerWithDetails; onT
         await showToast({
           style: Toast.Style.Success,
           title: "Timer Reset",
-          message: `${timer.name} timer reset to current time`,
+          message: `${timer.name || "Unnamed Timer"} timer reset to current time`,
         });
 
         onTimerStopped(); // Refresh the timer list
@@ -183,7 +187,7 @@ function TimerListItem({ timer, onTimerStopped }: { timer: TimerWithDetails; onT
 
   return (
     <List.Item
-      title={timer.name}
+      title={timer.name || "Unnamed Timer"}
       subtitle={
         timer.childName === "Deleted Child" || timer.childName === "Unknown Child"
           ? timer.childName
