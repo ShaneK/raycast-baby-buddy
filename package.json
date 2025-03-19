@@ -171,10 +171,15 @@
       "title": "Get Sleeping Children",
       "name": "getSleepingChildren",
       "description": "Get a list of children who are currently sleeping"
+    },
+    {
+      "title": "Get Date Time",
+      "name": "getDateTime",
+      "description": "Get the current date and time, useful for if the AI needs a relative time or date. It can't seem to get the correct time on its own, so this tool provides the current time and date."
     }
   ],
   "ai": {
-    "instructions": "If the user does not specify a child name and they have more than one child, ask them to specify a child name. If they only have one child, use that child's name without asking. All time-based inputs should be DateTimes unless otherwise specified, if the user only provides a time assume it's today unless otherwise specified. For time based outputs, format the output to the user's regional date time format. Any time you need to know the user's current time, look up the time for their timezone through a web search first and use the results to determine the current time. When the user refers to a feeding time, they usually want to know when it began. Other times with time ranges they want to know when they ended.",
+    "instructions": "If the user does not specify a child name and they have more than one child, ask them to specify a child name. If they only have one child, use that child's name without asking. All time-based inputs should be DateTimes unless otherwise specified, if the user only provides a time assume it's today unless otherwise specified. For time based outputs, format the output to the user's regional date time format. When the user refers to a feeding time, they usually want to know when it began. Other times with time ranges they want to know when they ended. If you need to know the user's current time or date for any reason, use the getDateTime tool.",
     "evals": [
       {
         "input": "When is the last time my children ate?",
@@ -190,6 +195,10 @@
       },
       {
         "input": "Convert the active timer to a feeding entry for formula",
+        "usedAsExample": true
+      },
+      {
+        "input": "Start a sleep timer starting 20 minutes ago",
         "usedAsExample": true
       }
     ]
