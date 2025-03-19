@@ -41,3 +41,26 @@ A Raycast extension for interacting with your [Baby Buddy](https://github.com/ba
 3. **Choose the activity type** that the timer was for
 4. **Fill in details** specific to that activity (amount, notes, etc.)
 5. The timer is automatically deleted and a proper Baby Buddy event is created
+
+## AI Commands
+
+Baby Buddy Raycast Extension includes natural language AI capabilities to make tracking and managing baby activities easier:
+
+- **Log Activities with Natural Language**: Create records quickly using commands like:
+  - "Log a wet diaper for Emma at 2:30pm"
+  - "Record a 15-minute tummy time for Jacob"
+  - "Track 4oz bottle feeding for Sophia from 3:15pm to 3:30pm"
+  - "Log Emma slept from 7pm to 6am"
+
+- **Quick Status Queries**: Get information instantly:
+  - "When was Emma's last feeding?"
+  - "How long did Jacob sleep today?"
+  - "Show me Sophia's diaper changes for today"
+  - "What was Emma's total sleep time yesterday?"
+
+- **Weekly and Monthly Reports**: Generate summaries using natural language:
+  - "Summarize Jacob's feeding patterns this week"
+  - "Show me Emma's sleep trends for the month"
+  - "Generate a report of Sophia's diaper changes for the past 7 days"
+
+The AI interprets your requests and interacts directly with your Baby Buddy instance, saving you time and making baby tracking more intuitive. If you only have one child, it shouldn't need their name. If you have multiple children but typically only use one, you can edit the extension in the Raycast settings and add a prompt to default to a child by their name (e.g. "If I need to provide a child name but did not, assume I mean Emma")
