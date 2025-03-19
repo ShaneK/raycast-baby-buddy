@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, confirmAlert, Form } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, confirmAlert, Form, Alert } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child, SleepEntry } from "../api";
 import { formatTimeAgo, formatTimeWithTooltip } from "../utils";
@@ -42,6 +42,7 @@ export default function SleepList({ child }: SleepListProps) {
         message: `Are you sure you want to delete this sleep entry from ${formatTimeAgo(sleep.end)}?`,
         primaryAction: {
           title: "Delete",
+          style: Alert.ActionStyle.Destructive,
         },
       })
     ) {

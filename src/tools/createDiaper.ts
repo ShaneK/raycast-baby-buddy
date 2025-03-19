@@ -51,14 +51,16 @@ export default async function ({
   const normalizedContents = normalizeContents(contents);
 
   // Format and prepare the data using utility function
-  const diaperData = formatDiaperDataFromContents({
-    childId: child.id,
-    time: formattedTime,
-    contents,
-    color,
-    amount,
-    notes,
-  });
+  const diaperData = {
+    ...formatDiaperDataFromContents({
+      childId: child.id,
+      time: formattedTime,
+      contents,
+      color,
+      amount,
+      notes,
+    }),
+  };
 
   try {
     const newDiaper = await api.createDiaper(diaperData);

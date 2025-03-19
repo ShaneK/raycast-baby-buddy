@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Form } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Form, Alert } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child, FeedingEntry } from "../api";
 import { formatTimeAgo, formatTimeWithTooltip } from "../utils";
@@ -41,6 +41,7 @@ export default function FeedingList({ child }: FeedingListProps) {
       message: `Are you sure you want to delete this feeding from ${formatTimeAgo(feeding.start)}?`,
       primaryAction: {
         title: "Delete",
+        style: Alert.ActionStyle.Destructive,
       },
     });
     if (shouldDelete) {

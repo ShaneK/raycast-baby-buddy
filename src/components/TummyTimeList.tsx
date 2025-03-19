@@ -1,4 +1,15 @@
-import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, confirmAlert, Form } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  useNavigation,
+  showToast,
+  Toast,
+  confirmAlert,
+  Form,
+  Alert,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child, TummyTimeEntry } from "../api";
 import { formatTimeAgo, formatTimeWithTooltip } from "../utils";
@@ -44,7 +55,7 @@ export default function TummyTimeList({ child }: TummyTimeListProps) {
         message: `Are you sure you want to delete this tummy time from ${formatTimeAgo(tummyTime.end)}?`,
         primaryAction: {
           title: "Delete",
-          style: Action.Style.Destructive,
+          style: Alert.ActionStyle.Destructive,
         },
       })
     ) {

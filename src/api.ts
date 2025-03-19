@@ -529,15 +529,7 @@ export class BabyBuddyAPI {
   }
 
   // Diaper methods
-  async createDiaper(data: {
-    child: number;
-    time: string;
-    wet: boolean;
-    solid: boolean;
-    color: string;
-    amount: number | null;
-    notes: string;
-  }): Promise<DiaperEntry> {
+  async createDiaper(data: Partial<DiaperEntry>): Promise<DiaperEntry> {
     try {
       const response = await axios.post(`${this.baseUrl}/api/changes/`, data, {
         headers: {

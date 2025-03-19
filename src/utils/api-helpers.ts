@@ -105,19 +105,18 @@ export function getContentsDescription(contents: { wet: boolean; solid: boolean 
  * Prepare diaper update data for API request
  */
 export function prepareDiaperUpdateData(params: {
-  childId?: number;
+  childId: number;
   time?: string;
   wet?: boolean;
   solid?: boolean;
   color?: string;
   amount?: string | number;
   notes?: string;
-}): Partial<DiaperEntry> {
+}): Partial<DiaperEntry> & { child: number } {
   const { childId, time, wet, solid, color, amount, notes } = params;
 
-  const updateData: Partial<DiaperEntry> = {};
+  const updateData: Partial<DiaperEntry> & { child: number } = { child: childId };
 
-  if (childId !== undefined) updateData.child = childId;
   if (time !== undefined) updateData.time = formatTimeToISO(time) || time;
   if (wet !== undefined) updateData.wet = wet;
   if (solid !== undefined) updateData.solid = solid;

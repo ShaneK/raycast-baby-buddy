@@ -11,7 +11,7 @@ type EditDiaperInput = {
   /**
    * The name of the child this diaper change is for
    */
-  childName?: string;
+  childName: string;
   /**
    * Whether the diaper was wet
    */
@@ -50,19 +50,14 @@ export default async function editDiaper({
 }: EditDiaperInput) {
   const api = new BabyBuddyAPI();
 
-  let childId: number | undefined;
+  const children = await api.getChildren();
+  const child = children.length === 1 ? children[0] : findChildByName(children, childName || "");
 
-  // If childName is provided, look up the child ID
-  if (childName) {
-    const children = await api.getChildren();
-    const child = findChildByName(children, childName);
-
-    if (!child) {
-      throw new Error(`Child with name ${childName} not found`);
-    }
-
-    childId = child.id;
+  if (!child) {
+    throw new Error(`Child with name ${childName} not found`);
   }
+
+  const childId = child.id;
 
   // Prepare update data using utility function
   const updateData = prepareDiaperUpdateData({
