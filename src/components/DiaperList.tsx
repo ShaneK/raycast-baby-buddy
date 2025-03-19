@@ -1,4 +1,15 @@
-import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, confirmAlert, Form } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  useNavigation,
+  showToast,
+  Toast,
+  confirmAlert,
+  Form,
+  Alert,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child, DiaperEntry } from "../api";
 import { formatTimeAgo, formatTimeWithTooltip } from "../utils";
@@ -53,7 +64,7 @@ export default function DiaperList({ child }: DiaperListProps) {
         message: `Are you sure you want to delete this diaper change from ${formatTimeAgo(diaper.time)}?`,
         primaryAction: {
           title: "Delete",
-          style: Action.Style.Destructive as Action.Style,
+          style: Alert.ActionStyle.Destructive,
         },
       })
     ) {
@@ -217,12 +228,7 @@ function DiaperListItem({
               );
             }}
           />
-          <Action
-            title="Delete Diaper Change"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive as Action.Style}
-            onAction={onDelete}
-          />
+          <Action title="Delete Diaper Change" icon={Icon.Trash} style={Action.Style.Destructive} onAction={onDelete} />
           <Action title="Create Diaper Change" icon={Icon.Plus} onAction={onCreateDiaper} />
         </ActionPanel>
       }

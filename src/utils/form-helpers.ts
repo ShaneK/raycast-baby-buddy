@@ -103,7 +103,7 @@ export function formatDiaperData(params: {
  */
 export function formatDiaperDataFromContents(params: {
   childId: number;
-  time: Date;
+  time: string;
   contents: string;
   color: string;
   amount: string;
@@ -113,7 +113,7 @@ export function formatDiaperDataFromContents(params: {
 
   return formatDiaperData({
     childId: params.childId,
-    time: params.time,
+    time: new Date(params.time),
     isWet: wet,
     isSolid: solid,
     color: params.color,
