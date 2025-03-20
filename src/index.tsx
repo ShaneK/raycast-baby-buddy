@@ -131,7 +131,7 @@ function ChildListItem({ child }: { child: Child }) {
       navigation.pop();
 
       // Then push the appropriate list view
-      console.log('Activity type:', activityType);
+      console.log("Activity type:", activityType);
       switch (activityType) {
         case "Feeding":
           navigation.push(<FeedingList child={child} />);
