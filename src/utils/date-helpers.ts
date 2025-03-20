@@ -2,6 +2,8 @@
  * Utility functions for handling dates and times
  */
 
+import { differenceInSeconds, formatDistanceToNow, parseISO } from "date-fns";
+
 /**
  * Formats a time string to ISO format if provided
  * Handles both ISO strings and HH:MM:SS format
@@ -78,27 +80,43 @@ export function validateTimeRange(startTime: Date, endTime: Date): boolean {
 }
 
 /**
- * Formats a date for display with time ago information
+ * Formats a time relative to now (e.g., "2 hours ago")
  * @param dateString - ISO date string to format
  * @returns Formatted string like "2 hours ago"
  */
-export function formatTimeAgo(dateString: string): string {
-  const date = new Date(dateString);
-  const now = new Date();
-  const diffInMs = now.getTime() - date.getTime();
+export function formatTimeAgo(dateString: string | undefined): string {
+  if (!dateString) return "Unknown";
+  try {
+    const date = parseISO(dateString);
+    return formatDistanceToNow(date, { addSuffix: true });
+  } catch (error) {
+    console.error("Error parsing date:", error);
+    return "Invalid date";
+  }
+}
 
-  const minutes = Math.floor(diffInMs / 60000);
-  const hours = Math.floor(minutes / 60);
-  const days = Math.floor(hours / 24);
+/**
+ * Formats a date as a full date and time string
+ * @param dateString - ISO date string to format
+ * @returns Formatted date and time string
+ */
+export function formatFullTime(dateString: string | undefined): string {
+  if (!dateString) return "Unknown";
+  try {
+    const date = parseISO(dateString);
+    // Format without leading zeros and with seconds
+    const hours = date.getHours() % 12 || 12; // Convert 0 to 12 for 12-hour format
+    const minutes = date.getMinutes();
+    const seconds = date.getSeconds();
+    const ampm = date.getHours() >= 12 ? "PM" : "AM";
+    const month = date.getMonth() + 1; // getMonth() is zero-based
+    const day = date.getDate();
+    const year = date.getFullYear();
 
-  if (days > 0) {
-    return `${days} ${days === 1 ? "day" : "days"} ago`;
-  } else if (hours > 0) {
-    return `${hours} ${hours === 1 ? "hour" : "hours"} ago`;
-  } else if (minutes > 0) {
-    return `${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
-  } else {
-    return "just now";
+    return `${month}/${day}/${year} ${hours}:${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")} ${ampm}`;
+  } catch (error) {
+    console.error("Error formatting full time:", error);
+    return "Invalid date";
   }
 }
 
@@ -107,16 +125,61 @@ export function formatTimeAgo(dateString: string): string {
  * @param dateString - ISO date string to format
  * @returns Object with text and tooltip properties
  */
-export function formatTimeWithTooltip(dateString: string): { text: string; tooltip: string } {
-  const date = new Date(dateString);
+export function formatTimeWithTooltip(dateString: string | undefined): { text: string; tooltip: string } {
+  return {
+    text: formatTimeAgo(dateString),
+    tooltip: formatFullTime(dateString),
+  };
+}
 
-  // Format time ago for display
-  const timeAgo = formatTimeAgo(dateString);
+/**
+ * Format a duration string into a more readable format
+ * @param durationString Baby Buddy duration string in format "HH:MM:SS"
+ * @returns Formatted duration string like "2h 30m"
+ */
+export function formatDuration(durationString: string | undefined): string {
+  if (!durationString) return "Unknown";
 
-  // Format full date and time for tooltip
-  const tooltip = date.toLocaleString();
+  // Baby Buddy durations are in format "HH:MM:SS"
+  const parts = durationString.split(":");
+  if (parts.length !== 3) return durationString;
 
-  return { text: timeAgo, tooltip };
+  const hours = parseInt(parts[0], 10);
+  const minutes = parseInt(parts[1], 10);
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  } else {
+    return `${minutes}m`;
+  }
+}
+
+/**
+ * Calculates and formats the elapsed time since a start time
+ * @param startTimeString - ISO string of the start time
+ * @returns Formatted elapsed time (e.g., "2h 30m 15s")
+ */
+export function calculateElapsedTime(startTimeString: string): string {
+  try {
+    const startTime = parseISO(startTimeString);
+    const now = new Date();
+    const seconds = differenceInSeconds(now, startTime);
+
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const remainingSeconds = seconds % 60;
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${remainingSeconds}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${remainingSeconds}s`;
+    } else {
+      return `${remainingSeconds}s`;
+    }
+  } catch (error) {
+    console.error("Error calculating elapsed time:", error);
+    return "Unknown";
+  }
 }
 
 /**

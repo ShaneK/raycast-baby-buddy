@@ -21,7 +21,7 @@ export default async function ({
   amount = "",
   notes = "",
   startTime,
-  endTime,
+  endTime = new Date().toISOString(),
 }: {
   childName: string;
   type: string;

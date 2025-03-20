@@ -70,7 +70,7 @@ export function formatDiaperDescription(diaper: DiaperEntry): string {
 /**
  * Format a duration in minutes to a human-readable string
  */
-export function formatDuration(minutes: number): string {
+export function formatMinutesToFullDuration(minutes: number): string {
   if (minutes < 60) {
     return `${minutes}m`;
   }

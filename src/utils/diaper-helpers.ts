@@ -1,10 +1,12 @@
 /**
- * Utility functions for diaper-related operations
+ * Get a description of diaper contents (wet, solid or both)
+ * @param wet Whether the diaper is wet
+ * @param solid Whether the diaper is solid
+ * @returns A description of the diaper contents
  */
-
-/**
- * Validates that a diaper entry has at least wet or solid
- */
-export function isValidDiaperType(wet: boolean, solid: boolean): boolean {
-  return wet || solid;
+export function getDiaperDescription(wet: boolean, solid: boolean): string {
+  if (wet && solid) return "wet and solid";
+  if (wet) return "wet";
+  if (solid) return "solid";
+  return "";
 }

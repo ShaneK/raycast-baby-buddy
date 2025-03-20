@@ -2,7 +2,7 @@ import { ActionPanel, Action, Detail, Icon, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI } from "../api";
 import { Child, FeedingEntry, SleepEntry, DiaperEntry, TummyTimeEntry } from "../api";
-import { formatTimeAgo } from "../utils";
+import { formatTimeAgo, formatMinutesToFullDuration, formatDiaperDescription } from "../utils";
 import {
   calculateTotalFeedingAmount,
   calculateTotalSleepMinutes,
@@ -12,9 +12,7 @@ import {
   calculateTotalDiaperAmount,
   calculateAge,
 } from "../utils/statistics";
-import { formatDuration } from "../utils/formatters";
 import { getTodayDateRange } from "../utils/date-helpers";
-import { formatDiaperDescription } from "../utils/formatters";
 import FeedingList from "./FeedingList";
 import SleepList from "./SleepList";
 import DiaperList from "./DiaperList";
@@ -135,7 +133,7 @@ ${
     : "No recent sleep recorded"
 }
   
-Total today: **${formatDuration(totalSleepMinutes)}**
+Total today: **${formatMinutesToFullDuration(totalSleepMinutes)}**
 
 ## Diaper Changes
 ${
@@ -153,7 +151,7 @@ ${
     : "No recent tummy time recorded"
 }
   
-Total today: **${formatDuration(totalTummyTimeMinutes)}**
+Total today: **${formatMinutesToFullDuration(totalTummyTimeMinutes)}**
 `;
 
   return (
@@ -196,12 +194,12 @@ Total today: **${formatDuration(totalTummyTimeMinutes)}**
             title="Today's Feedings"
             text={`${stats.todayFeedings.length} (${totalFeedingAmount.toFixed(1)})`}
           />
-          <Detail.Metadata.Label title="Today's Sleep" text={formatDuration(totalSleepMinutes)} />
+          <Detail.Metadata.Label title="Today's Sleep" text={formatMinutesToFullDuration(totalSleepMinutes)} />
           <Detail.Metadata.Label
             title="Today's Diapers"
             text={`${stats.todayDiapers.length} (${wetDiapers} wet, ${solidDiapers} solid${totalDiaperAmount > 0 ? `, ${totalDiaperAmount.toFixed(1)} amount` : ""})`}
           />
-          <Detail.Metadata.Label title="Today's Tummy Time" text={formatDuration(totalTummyTimeMinutes)} />
+          <Detail.Metadata.Label title="Today's Tummy Time" text={formatMinutesToFullDuration(totalTummyTimeMinutes)} />
           <Detail.Metadata.Separator />
           <Detail.Metadata.TagList title="Quick Actions">
             <Detail.Metadata.TagList.Item

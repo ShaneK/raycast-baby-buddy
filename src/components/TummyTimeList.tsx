@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child, TummyTimeEntry } from "../api";
-import { formatTimeAgo, formatTimeWithTooltip } from "../utils";
+import { formatDuration, formatTimeAgo, formatTimeWithTooltip } from "../utils";
 import { formatErrorMessage } from "../utils/form-helpers";
 import CreateTummyTimeForm from "./CreateTummyTimeForm";
 
@@ -75,19 +75,6 @@ export default function TummyTimeList({ child }: TummyTimeListProps) {
           message: formatErrorMessage(error),
         });
       }
-    }
-  }
-
-  function formatDuration(duration: string) {
-    // Format duration like "0:30:00" to "30m"
-    const parts = duration.split(":");
-    const hours = parseInt(parts[0]);
-    const minutes = parseInt(parts[1]);
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    } else {
-      return `${minutes}m`;
     }
   }
 

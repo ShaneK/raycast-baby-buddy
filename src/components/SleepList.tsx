@@ -1,7 +1,18 @@
-import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, confirmAlert, Form, Alert } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  useNavigation,
+  showToast,
+  Toast,
+  confirmAlert,
+  Form,
+  Alert,
+} from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child, SleepEntry } from "../api";
-import { formatTimeAgo, formatTimeWithTooltip } from "../utils";
+import { formatDuration, formatTimeAgo, formatTimeWithTooltip } from "../utils";
 import { formatErrorMessage } from "../utils/form-helpers";
 import CreateSleepForm from "./CreateSleepForm";
 
@@ -124,12 +135,6 @@ interface SleepListItemProps {
 
 function SleepListItem({ sleep, childName, onSleepDeleted, onSleepUpdated }: SleepListItemProps) {
   const timeInfo = formatTimeWithTooltip(sleep.end);
-
-  // Format duration for display
-  const formatDuration = (durationString: string) => {
-    const [hours, minutes] = durationString.split(":").map(Number);
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-  };
 
   // Get icon based on nap status
   const getSleepIcon = (isNap: boolean) => {

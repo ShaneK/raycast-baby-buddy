@@ -76,6 +76,9 @@ export const confirmation: Tool.Confirmation<DeleteTimerInput> = async (input) =
   }
 };
 
+/**
+ * Stop or delete a timer
+ */
 export default async function deleteTimer({ timerId }: DeleteTimerInput) {
   const api = new BabyBuddyAPI();
 

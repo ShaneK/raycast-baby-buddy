@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Form, Alert } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child, FeedingEntry } from "../api";
-import { formatTimeAgo, formatTimeWithTooltip } from "../utils";
+import { formatDuration, formatTimeAgo, formatTimeWithTooltip } from "../utils";
 import { formatErrorMessage } from "../utils/form-helpers";
 import CreateFeedingForm from "./CreateFeedingForm";
 
@@ -125,11 +125,6 @@ function FeedingListItem({ feeding, childName, onFeedingDeleted, onFeedingUpdate
   const timeInfo = formatTimeWithTooltip(feeding.start);
 
   // Format duration for display
-  const formatDuration = (durationString: string) => {
-    const [hours, minutes] = durationString.split(":").map(Number);
-    return hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`;
-  };
-
   // Get icon based on feeding type
   const getIconForFeedingType = (type: string) => {
     switch (type.toLowerCase()) {

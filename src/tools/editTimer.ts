@@ -26,6 +26,9 @@ type EditTimerInput = {
   endTime?: string;
 };
 
+/**
+ * Update a timer
+ */
 export default async function editTimer({ timerId, childName, timerName, startTime, endTime }: EditTimerInput) {
   const api = new BabyBuddyAPI();
 
