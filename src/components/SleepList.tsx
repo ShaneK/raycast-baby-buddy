@@ -23,6 +23,7 @@ interface SleepListProps {
 export default function SleepList({ child }: SleepListProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [sleepEntries, setSleepEntries] = useState<SleepEntry[]>([]);
+  const navigation = useNavigation();
 
   async function fetchSleepEntries() {
     try {
@@ -40,6 +41,11 @@ export default function SleepList({ child }: SleepListProps) {
       });
       setIsLoading(false);
     }
+  }
+
+  async function createSleepAndNavigateBack() {
+    await fetchSleepEntries();
+    navigation.pop();
   }
 
   useEffect(() => {
@@ -100,7 +106,7 @@ export default function SleepList({ child }: SleepListProps) {
                   child: child.id,
                 }}
                 childName={child.first_name}
-                onEventCreated={fetchSleepEntries}
+                onEventCreated={createSleepAndNavigateBack}
               />
             }
           />

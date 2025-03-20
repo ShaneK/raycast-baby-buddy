@@ -53,6 +53,11 @@ export default function DiaperList({ child }: DiaperListProps) {
     }
   }
 
+  async function createDiaperAndNavigateBack() {
+    await fetchDiaperEntries();
+    navigation.pop();
+  }
+
   useEffect(() => {
     fetchDiaperEntries();
   }, [child.id]);
@@ -136,7 +141,7 @@ export default function DiaperList({ child }: DiaperListProps) {
       <CreateDiaperForm
         timer={dummyTimer}
         childName={`${child.first_name} ${child.last_name}`}
-        onEventCreated={fetchDiaperEntries}
+        onEventCreated={createDiaperAndNavigateBack}
       />,
     );
   }

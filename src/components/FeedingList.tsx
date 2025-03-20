@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Form, Alert } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, confirmAlert, Form, Alert, useNavigation } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { BabyBuddyAPI, Child, FeedingEntry } from "../api";
 import { formatDuration, formatTimeAgo, formatTimeWithTooltip } from "../utils";
@@ -12,6 +12,7 @@ interface FeedingListProps {
 export default function FeedingList({ child }: FeedingListProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [feedings, setFeedings] = useState<FeedingEntry[]>([]);
+  const navigation = useNavigation();
 
   async function fetchFeedings() {
     try {
@@ -29,6 +30,11 @@ export default function FeedingList({ child }: FeedingListProps) {
       });
       setIsLoading(false);
     }
+  }
+
+  async function updateFeedingsAndNavigateBack() {
+    await fetchFeedings();
+    navigation.pop();
   }
 
   useEffect(() => {
@@ -107,7 +113,7 @@ export default function FeedingList({ child }: FeedingListProps) {
           feeding={feeding}
           childName={child.first_name}
           onFeedingDeleted={() => handleDeleteFeeding(feeding)}
-          onFeedingUpdated={fetchFeedings}
+          onFeedingUpdated={updateFeedingsAndNavigateBack}
         />
       ))}
     </List>

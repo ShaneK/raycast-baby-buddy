@@ -44,6 +44,11 @@ export default function TummyTimeList({ child }: TummyTimeListProps) {
     }
   }
 
+  async function createTummyTimeAndNavigateBack() {
+    await fetchTummyTimeEntries();
+    navigation.pop();
+  }
+
   useEffect(() => {
     fetchTummyTimeEntries();
   }, [child.id]);
@@ -95,7 +100,7 @@ export default function TummyTimeList({ child }: TummyTimeListProps) {
       <CreateTummyTimeForm
         timer={dummyTimer}
         childName={`${child.first_name} ${child.last_name}`}
-        onEventCreated={fetchTummyTimeEntries}
+        onEventCreated={createTummyTimeAndNavigateBack}
       />,
     );
   }

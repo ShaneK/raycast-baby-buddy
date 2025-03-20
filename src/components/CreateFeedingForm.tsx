@@ -55,6 +55,7 @@ export default function CreateFeedingForm({ timer, childName, onEventCreated }: 
       });
 
       // Create the feeding entry
+      console.log('Here1')
       await api.createFeeding(feedingData);
 
       // Only delete the timer if it's a real timer (id > 0)
@@ -62,6 +63,7 @@ export default function CreateFeedingForm({ timer, childName, onEventCreated }: 
         await api.deleteTimer(timer.id);
       }
 
+      console.log('Here2')
       await showToast({
         style: Toast.Style.Success,
         title: "Feeding Created",
@@ -69,6 +71,7 @@ export default function CreateFeedingForm({ timer, childName, onEventCreated }: 
       });
 
       // Call the callback to refresh and navigate
+      console.log('Here3')
       onEventCreated();
     } catch (error: unknown) {
       console.error("Failed to create feeding:", error);
